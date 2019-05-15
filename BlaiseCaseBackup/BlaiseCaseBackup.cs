@@ -34,12 +34,28 @@ namespace BlaiseCaseBackup
 
         protected override void OnStart(string[] args)
         {
+            RunBackup();
+        }
+
+        public void RunBackup()
+        {
             // Connection parameters
             string serverName = ConfigurationManager.AppSettings["BlaiseServerHostName"];
             string userName = ConfigurationManager.AppSettings["BlaiseServerUserName"];
             string password = ConfigurationManager.AppSettings["BlaiseServerPassword"];
 
-            ServerManagerAPI.IConnectedServer serverManagerConnection = ServerManagerAPI.ServerManager.ConnectToServer(serverName, 8031, userName, GetPassword(password));
+            ServerManagerAPI.IConnectedServer serverManagerConnection = null;
+            try
+            {
+                log.Info("Attempting to connect to Blaise Server Manager.");
+                serverManagerConnection = ServerManagerAPI.ServerManager.ConnectToServer(serverName, 8031, userName, GetPassword(password));
+            }
+            catch (Exception e)
+            {
+                log.Error("Error connecting to Blaise Server Manager.");
+                log.Error(e.Message);
+                log.Error(e.StackTrace);
+            }
 
             // Loop through the server parks on the connected Blaise server.
             foreach (ServerManagerAPI.IServerPark serverPark in serverManagerConnection.ServerParks)
@@ -55,8 +71,8 @@ namespace BlaiseCaseBackup
         protected override void OnStop()
         {
         }
-        
-        private static void BackupSurvey(string serverPark, string instrument)
+
+        public void BackupSurvey(string serverPark, string instrument)
         {
             // Get the BMI and BDI files for the survey:
             string originalBDI = GetDataFileName(serverPark, instrument);
@@ -81,45 +97,76 @@ namespace BlaiseCaseBackup
             MoveDataToFolder(instrument, directory, "C:\\BlaiseBackup", filesToMove);
         }
 
-        private static string GetDataFileName(string serverPark, string instrument)
+        public string GetDataFileName(string serverPark, string instrument)
         {
-            var connection = ConnectToBlaiseServer();
-
-            var surveys = connection.GetSurveys(serverPark);
-
-            foreach (ServerManagerAPI.ISurvey2 survey in surveys)
+            try
             {
-                if (survey.Name == instrument)
+                string serverName = ConfigurationManager.AppSettings.Get("BlaiseServerHostName");
+                string username = ConfigurationManager.AppSettings.Get("BlaiseServerUserName");
+                string password = ConfigurationManager.AppSettings.Get("BlaiseServerPassword");
+
+                var connection = ConnectToBlaiseServer(serverName, username, password);
+
+
+                var surveys = connection.GetSurveys(serverPark);
+
+                foreach (ServerManagerAPI.ISurvey2 survey in surveys)
                 {
-                    var conf = survey.Configuration.Configurations.ElementAt(0);
+                    if (survey.Name == instrument)
+                    {
+                        var conf = survey.Configuration.Configurations.ElementAt(0);
 
-                    return conf.DataFileName;
+                        return conf.DataFileName;
+                    }
                 }
-            }
 
-            return "";
+                return "";
+            }
+            catch (Exception e)
+            {
+                log.Error("Error getting meta file name.");
+                log.Error(e.Message);
+                log.Error(e.StackTrace);
+
+                return "";
+            }
         }
 
-        private static string GetMetaFileName(string serverPark, string instrument)
+        public string GetMetaFileName(string serverPark, string instrument)
         {
-            var connection = ConnectToBlaiseServer();
-
-            var surveys = connection.GetSurveys(serverPark);
-
-            foreach (ServerManagerAPI.ISurvey2 survey in surveys)
+            try
             {
-                if (survey.Name == instrument)
+                string serverName = ConfigurationManager.AppSettings.Get("BlaiseServerHostName");
+                string username = ConfigurationManager.AppSettings.Get("BlaiseServerUserName");
+                string password = ConfigurationManager.AppSettings.Get("BlaiseServerPassword");
+
+                var connection = ConnectToBlaiseServer(serverName, username, password);
+
+                var surveys = connection.GetSurveys(serverPark);
+
+                foreach (ServerManagerAPI.ISurvey2 survey in surveys)
                 {
-                    var conf = survey.Configuration.Configurations.ElementAt(0);
+                    if (survey.Name == instrument)
+                    {
+                        var conf = survey.Configuration.Configurations.ElementAt(0);
 
-                    return conf.MetaFileName;
+                        return conf.MetaFileName;
+                    }
                 }
-            }
 
-            return "";
+                return "";
+            }
+            catch(Exception e)
+            {
+                log.Error("Error getting meta file name.");
+                log.Error(e.Message);
+                log.Error(e.StackTrace);
+
+                return "";
+            }
         }
 
-        private static string CreateBackupFile(string instrument, string directory, string bdixFileName, string bmixFileName)
+        public string CreateBackupFile(string instrument, string directory, string bdixFileName, string bmixFileName)
         {
             // Get an empty IDataInterface:
             DataInterfaceAPI.IDataInterface di = DataInterfaceAPI.DataInterfaceManager.GetDataInterface();
@@ -148,7 +195,7 @@ namespace BlaiseCaseBackup
             return di.FileName;
         }
 
-        private static DataLinkAPI.IDataLink GetDataLinkFromBDI(string bdiFile)
+        public DataLinkAPI.IDataLink GetDataLinkFromBDI(string bdiFile)
         {
             try
             {
@@ -162,7 +209,7 @@ namespace BlaiseCaseBackup
             }
         }
 
-        private static void CopyDataRecords(DataLinkAPI.IDataLink originalDL, DataLinkAPI.IDataLink backupDL)
+        public void CopyDataRecords(DataLinkAPI.IDataLink originalDL, DataLinkAPI.IDataLink backupDL)
         {
             DataLinkAPI.IDataSet ds = originalDL.Read("");
 
@@ -177,7 +224,8 @@ namespace BlaiseCaseBackup
             }
         }
 
-        private static bool MoveDataToFolder(string instrument, string currentDirectory, string backupDirectory, string[] files)
+
+        public bool MoveDataToFolder(string instrument, string currentDirectory, string backupDirectory, string[] files)
         {
             try
             {
@@ -208,23 +256,38 @@ namespace BlaiseCaseBackup
             }
         }
 
-        private static ServerManagerAPI.IConnectedServer2 ConnectToBlaiseServer()
+        /// <summary>
+        /// Establishes a connection to a Blaise Server.
+        /// </summary>
+        /// <param name="serverName">The location of the Blaise server.</param>
+        /// <param name="userName">Username with access to the specified server.</param>
+        /// <param name="password">Password for the specified user to access the server.</param>
+        /// <returns>A IConnectedServer2 object which is connected to the server provided.</returns>
+        public ServerManagerAPI.IConnectedServer2 ConnectToBlaiseServer(string serverName, string userName, string password)
         {
-            // 1. Connect to a management server:
-            string serverName = "localhost";
-
-            // Use default credentials (assuming Blaise developer installation):
-            string userName = "Root";
-            string password = "Root";
             int port = 8031;
+            try
+            {
+                ServerManagerAPI.IConnectedServer2 connServer =
+                    (ServerManagerAPI.IConnectedServer2)ServerManagerAPI.ServerManager.ConnectToServer(serverName, port, userName, GetPassword(password));
 
-            ServerManagerAPI.IConnectedServer2 connServer =
-                (ServerManagerAPI.IConnectedServer2)ServerManagerAPI.ServerManager.ConnectToServer(serverName, port, userName, GetPassword(password));
-
-            return connServer;
+                return connServer;
+            }
+            catch (Exception e)
+            {
+                log.Error("Error getting Blaise connection.");
+                log.Error(e.Message);
+                log.Error(e.StackTrace);
+                return null;
+            }
         }
 
-        private static SecureString GetPassword(string pw)
+        /// <summary>
+        /// Converts a string password to the SecureString format.
+        /// </summary>
+        /// <param name="pw">The string password being read in for conversion.</param>
+        /// <returns>A SecureString version of the imported password.</returns>
+        public static SecureString GetPassword(string pw)
         {
             char[] passwordChars = pw.ToCharArray();
             SecureString password = new SecureString();
