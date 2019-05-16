@@ -14,6 +14,7 @@ using System.Threading.Tasks;
 using System.IO;
 using System.Configuration;
 using log4net;
+using System.Timers;
 
 namespace BlaiseCaseBackup
 {
@@ -34,22 +35,25 @@ namespace BlaiseCaseBackup
 
         protected override void OnStart(string[] args)
         {
-            RunBackup();
+            // Set up a timer that triggers every minute.
+            Timer timer = new Timer();
+            timer.Interval = 3600000; // 60 minutes
+            timer.Elapsed += new ElapsedEventHandler(this.RunBackup);
+            timer.Start();
         }
 
         protected override void OnStop()
         {
             log.Info("Blaise Case Backup service stopped.");
         }
-
-
+        
         /// <summary>
         /// Sets up and runs the backup process. This function connects to the local Blaise Server
         /// Manager and collects a list of the connected server parks. Each one is then 
         /// backed up through a process that loops through the collected server parks, running the
         /// back up functionality.
         /// </summary>
-        public void RunBackup()
+        public void RunBackup(object sender, ElapsedEventArgs args)
         {
             // Connection parameters
             string serverName = ConfigurationManager.AppSettings["BlaiseServerHostName"];
@@ -91,23 +95,37 @@ namespace BlaiseCaseBackup
             string originalBDI = GetDataFileName(serverPark, instrument);
             string originalBMI = GetMetaFileName(serverPark, instrument);
 
+            if (originalBDI == "" || originalBMI == "")
+                return;
+
             // Use one of the files to get their directory: 
             string directory = Path.GetDirectoryName(originalBDI);
             string backupBDI = CreateBackupFile(instrument, directory, originalBDI, originalBMI);
+
+            if (backupBDI == null)
+                return;
 
             // Get data links for the original and the backup data interfaces:
             var originalDataLink = GetDataLinkFromBDI(originalBDI);
             var backupDataLink = GetDataLinkFromBDI(backupBDI);
 
+            if (originalDataLink == null || backupDataLink == null)
+                return;
+
             CopyDataRecords(originalDataLink, backupDataLink);
 
             string[] filesToMove = { instrument + "_BACKUP.bdix", instrument + "_BACKUP.bdbx" };
 
+            //Drop the datalink objects out of scope to free up the resources.
             originalDataLink = null;
             backupDataLink = null;
 
+            bool success = MoveDataToFolder(instrument, directory, "C:\\BlaiseBackup", filesToMove);
 
-            MoveDataToFolder(instrument, directory, "C:\\BlaiseBackup", filesToMove);
+            if (success)
+                log.Info(String.Format("Successfully backed up Blaise data - {0}/{1}", serverPark, instrument));
+            else
+                log.Error(String.Format("Error backing up Blaise data - {0}/{1}", serverPark, instrument));
         }
 
         /// <summary>
@@ -256,16 +274,25 @@ namespace BlaiseCaseBackup
         /// <param name="backupDL">A datalink object referencing the backup data location.</param>
         public void CopyDataRecords(DataLinkAPI.IDataLink originalDL, DataLinkAPI.IDataLink backupDL)
         {
-            DataLinkAPI.IDataSet ds = originalDL.Read("");
-
-            while (!ds.EndOfSet)
+            try
             {
-                // Read the current record and write it to the backup database:
-                var dr = ds.ActiveRecord;
-                backupDL.Write(dr);
+                DataLinkAPI.IDataSet ds = originalDL.Read("");
 
-                // Move to the next record:
-                ds.MoveNext();
+                while (!ds.EndOfSet)
+                {
+                    // Read the current record and write it to the backup database:
+                    var dr = ds.ActiveRecord;
+                    backupDL.Write(dr);
+
+                    // Move to the next record:
+                    ds.MoveNext();
+                }
+            }
+            catch (Exception e)
+            {
+                log.Error("Error Copying data records.");
+                log.Error(e.Message);
+                log.Error(e.StackTrace);
             }
         }
 
