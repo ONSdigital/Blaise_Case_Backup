@@ -159,5 +159,56 @@ namespace BlaiseCaseBackup_UnitTests
 
             Assert.AreEqual(false, success);
         }
+
+        [TestMethod]
+        public void Test_Get_Datalink_From_BDI()
+        {
+            var b = new BlaiseCaseBackup.BlaiseCaseBackup();
+
+            string serverPark = "LocalDevelopment";
+            string instrument = "HealthSurvey";
+            // Get the BMI and BDI files for the survey:
+            string originalBDI = b.GetDataFileName(serverPark, instrument);
+
+
+            // Get data links for the original and the backup data interfaces:
+            var originalDataLink = b.GetDataLinkFromBDI(originalBDI);
+
+            Assert.AreNotEqual(null, originalDataLink);
+        }
+
+        [TestMethod]
+        public void Test_Get_Datalink_From_BDI_Fail_SP()
+        {
+            var b = new BlaiseCaseBackup.BlaiseCaseBackup();
+
+            string serverPark = "BadServerpark";
+            string instrument = "HealthSurvey";
+            // Get the BMI and BDI files for the survey:
+            string originalBDI = b.GetDataFileName(serverPark, instrument);
+
+
+            // Get data links for the original and the backup data interfaces:
+            var originalDataLink = b.GetDataLinkFromBDI(originalBDI);
+
+            Assert.AreEqual(null, originalDataLink);
+        }
+
+        [TestMethod]
+        public void Test_Get_Datalink_From_BDI_Fail_Instrument()
+        {
+            var b = new BlaiseCaseBackup.BlaiseCaseBackup();
+
+            string serverPark = "LocalDevelopment";
+            string instrument = "BadInstrument";
+            // Get the BMI and BDI files for the survey:
+            string originalBDI = b.GetDataFileName(serverPark, instrument);
+
+
+            // Get data links for the original and the backup data interfaces:
+            var originalDataLink = b.GetDataLinkFromBDI(originalBDI);
+
+            Assert.AreEqual(null, originalDataLink);
+        }
     }
 }

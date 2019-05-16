@@ -37,6 +37,18 @@ namespace BlaiseCaseBackup
             RunBackup();
         }
 
+        protected override void OnStop()
+        {
+            log.Info("Blaise Case Backup service stopped.");
+        }
+
+
+        /// <summary>
+        /// Sets up and runs the backup process. This function connects to the local Blaise Server
+        /// Manager and collects a list of the connected server parks. Each one is then 
+        /// backed up through a process that loops through the collected server parks, running the
+        /// back up functionality.
+        /// </summary>
         public void RunBackup()
         {
             // Connection parameters
@@ -68,10 +80,11 @@ namespace BlaiseCaseBackup
             }
         }
 
-        protected override void OnStop()
-        {
-        }
-
+        /// <summary>
+        /// Runs a series of functions necessary for backing up a Blaise data file.
+        /// </summary>
+        /// <param name="serverPark">The server park on which the target survey resides.</param>
+        /// <param name="instrument">The name of the survey (instrument).</param>
         public void BackupSurvey(string serverPark, string instrument)
         {
             // Get the BMI and BDI files for the survey:
@@ -97,6 +110,12 @@ namespace BlaiseCaseBackup
             MoveDataToFolder(instrument, directory, "C:\\BlaiseBackup", filesToMove);
         }
 
+        /// <summary>
+        /// Gets the name of the data file (.bdix) associated with a specified serverpark and instrument.
+        /// </summary>
+        /// <param name="serverPark">The serverpark where the instrument exists.</param>
+        /// <param name="instrument">The instrument who's data file we're getting.</param>
+        /// <returns>The string name of the data file (.bdix)</returns>
         public string GetDataFileName(string serverPark, string instrument)
         {
             try
@@ -132,6 +151,12 @@ namespace BlaiseCaseBackup
             }
         }
 
+        /// <summary>
+        /// Gets the name of the meta file (.bmix) associated with a specified serverpark and instrument.
+        /// </summary>
+        /// <param name="serverPark">The serverpark where the instrument exists.</param>
+        /// <param name="instrument">The instrument who's meta file we're getting.</param>
+        /// <returns>The string name of the meta file (.bmix)</returns>
         public string GetMetaFileName(string serverPark, string instrument)
         {
             try
@@ -166,6 +191,14 @@ namespace BlaiseCaseBackup
             }
         }
 
+        /// <summary>
+        /// Generates a backup data file from the target data (.bdix) and meta (.bmix) files provided.
+        /// </summary>
+        /// <param name="instrument">The name of the survey (instrument)</param>
+        /// <param name="directory">The directory where the source files reside.</param>
+        /// <param name="bdixFileName">The name of the source data file (.bdix)</param>
+        /// <param name="bmixFileName">The name of the source meta file (.bmix)</param>
+        /// <returns></returns>
         public string CreateBackupFile(string instrument, string directory, string bdixFileName, string bmixFileName)
         {
             // Get an empty IDataInterface:
@@ -195,6 +228,11 @@ namespace BlaiseCaseBackup
             return di.FileName;
         }
 
+        /// <summary>
+        /// Gets and returns a datalink connection to the target data file (.bdix).
+        /// </summary>
+        /// <param name="bdiFile">The name of the target data file (.bdix).</param>
+        /// <returns>A IDatalink connection object user to access the stored Blaise data.</returns>
         public DataLinkAPI.IDataLink GetDataLinkFromBDI(string bdiFile)
         {
             try
@@ -202,13 +240,20 @@ namespace BlaiseCaseBackup
                 var dl = DataLinkAPI.DataLinkManager.GetDataLink(bdiFile);
                 return dl;
             }
-            catch
+            catch(Exception e)
             {
-                Console.WriteLine("Error Getting DataLink");
+                log.Error("Error Getting DataLink");
+                log.Error(e.Message);
+                log.Error(e.StackTrace);
                 return null;
             }
         }
 
+        /// <summary>
+        /// Uses two datalink objects to copy the stored data from the original to the backup datastore.
+        /// </summary>
+        /// <param name="originalDL">A datalink object referencing the source data location.</param>
+        /// <param name="backupDL">A datalink object referencing the backup data location.</param>
         public void CopyDataRecords(DataLinkAPI.IDataLink originalDL, DataLinkAPI.IDataLink backupDL)
         {
             DataLinkAPI.IDataSet ds = originalDL.Read("");
@@ -224,19 +269,27 @@ namespace BlaiseCaseBackup
             }
         }
 
-
-        public bool MoveDataToFolder(string instrument, string currentDirectory, string backupDirectory, string[] files)
+        /// <summary>
+        /// Moves a data file/collection of data files from one directory to a backup directory 
+        /// using the instrument name as a sub folder.
+        /// </summary>
+        /// <param name="instrument">Name and version of the current survey (eg. OPN1901A).</param>
+        /// <param name="sourceDirectory">The directory from which the file(s) will be collected.</param>
+        /// <param name="backupDirectory">The directory where the new file subfolder will be created.</param>
+        /// <param name="files">The string name of each file being moved.</param>
+        /// <returns>A boolean indicating the success of the function.</returns>
+        public bool MoveDataToFolder(string instrument, string sourceDirectory, string backupDirectory, string[] files)
         {
             try
             {
-                Directory.GetAccessControl(currentDirectory);
+                Directory.GetAccessControl(sourceDirectory);
                 Directory.CreateDirectory(backupDirectory);
                 foreach (string fileName in files)
                 {
                     string targetDirectory = backupDirectory + "\\" + instrument;
                     Directory.CreateDirectory(targetDirectory);
 
-                    string sourceFilePath = currentDirectory + "\\" + fileName;
+                    string sourceFilePath = sourceDirectory + "\\" + fileName;
                     string destFilePath = targetDirectory + "\\" + fileName;
 
                     // Check if the backup file exists, delete it if it does.
