@@ -15,6 +15,9 @@ using System.IO;
 using System.Configuration;
 using log4net;
 using System.Timers;
+using System.Globalization;
+using StatNeth.Blaise.API.DataLink;
+using StatNeth.Blaise.API.ServerManager;
 
 namespace BlaiseCaseBackup
 {
@@ -30,15 +33,20 @@ namespace BlaiseCaseBackup
 
         public void OnDebug()
         {
-            this.OnStart(null);
+            RunBackup();
         }
 
         protected override void OnStart(string[] args)
         {
-            // Set up a timer that triggers every minute.
+            // Get the MinuteRunTimer env variable and convert it from minutes to miliseconds.
+            string timerString = ConfigurationManager.AppSettings["MinuteRunTimer"];
+            double time = double.Parse(timerString, CultureInfo.InvariantCulture.NumberFormat);
+            time = time * 60 * 1000;
+
+            // Set up a timer
             Timer timer = new Timer();
-            timer.Interval = 3600000; // 60 minutes
-            timer.Elapsed += new ElapsedEventHandler(this.RunBackup);
+            timer.Interval = time;
+            timer.Elapsed += new ElapsedEventHandler(this.StartBackup);
             timer.Start();
         }
 
@@ -46,15 +54,22 @@ namespace BlaiseCaseBackup
         {
             log.Info("Blaise Case Backup service stopped.");
         }
-        
+
+        public void StartBackup(object sender, ElapsedEventArgs args)
+        {
+            log.Info("Starting backup functionality...");
+            RunBackup();
+        }
+
         /// <summary>
         /// Sets up and runs the backup process. This function connects to the local Blaise Server
         /// Manager and collects a list of the connected server parks. Each one is then 
         /// backed up through a process that loops through the collected server parks, running the
         /// back up functionality.
         /// </summary>
-        public void RunBackup(object sender, ElapsedEventArgs args)
+        public void RunBackup()
         {
+            log.Info("Running backup process...");
             // Connection parameters
             string serverName = ConfigurationManager.AppSettings["BlaiseServerHostName"];
             string userName = ConfigurationManager.AppSettings["BlaiseServerUserName"];
@@ -79,7 +94,7 @@ namespace BlaiseCaseBackup
                 // Loop through the surveys installed on the current server park
                 foreach (ServerManagerAPI.ISurvey survey in serverManagerConnection.GetServerPark(serverPark.Name).Surveys)
                 {
-                    BackupSurvey(serverPark.Name, survey.Name);
+                    BackupSurvey(serverPark, survey);
                 }
             }
         }
@@ -89,43 +104,62 @@ namespace BlaiseCaseBackup
         /// </summary>
         /// <param name="serverPark">The server park on which the target survey resides.</param>
         /// <param name="instrument">The name of the survey (instrument).</param>
-        public void BackupSurvey(string serverPark, string instrument)
+        public void BackupSurvey(ServerManagerAPI.IServerPark serverPark, ServerManagerAPI.ISurvey instrument)
         {
+
+            log.Info(String.Format("Survey found - {0}/{1}.", serverPark.Name, instrument.Name));
+
             // Get the BMI and BDI files for the survey:
-            string originalBDI = GetDataFileName(serverPark, instrument);
-            string originalBMI = GetMetaFileName(serverPark, instrument);
+            string originalBDI = GetDataFileName(serverPark.Name, instrument.Name);
+            string originalBMI = GetMetaFileName(serverPark.Name, instrument.Name);
 
             if (originalBDI == "" || originalBMI == "")
                 return;
 
             // Use one of the files to get their directory: 
             string directory = Path.GetDirectoryName(originalBDI);
-            string backupBDI = CreateBackupFile(instrument, directory, originalBDI, originalBMI);
+            string backupBDI = CreateBackupFile(instrument.Name, directory, originalBDI, originalBMI);
 
             if (backupBDI == null)
+            {
+                log.Error(String.Format("Backup BDI not available - {0}/{1} aborted.", serverPark.Name, instrument.Name));
                 return;
-
+            }
             // Get data links for the original and the backup data interfaces:
-            var originalDataLink = GetDataLinkFromBDI(originalBDI);
+            //var originalDataLink = GetDataLinkFromBDI(originalBDI);
+            var originalDataLink = GetRemoteDataLink(serverPark, instrument);
+
             var backupDataLink = GetDataLinkFromBDI(backupBDI);
 
             if (originalDataLink == null || backupDataLink == null)
+            {
+                log.Error(String.Format("Backup of {0}/{1} aborted.", serverPark.Name, instrument.Name));
+                log.Error("One of the two datalink objects has returned NULL.");
+                log.Error("Original : " + originalDataLink);
+                log.Error("Backup : " + backupDataLink);
                 return;
+            }
+            log.Info("Datalink connection established: Record Count : " + originalDataLink.RecordCount);
 
-            CopyDataRecords(originalDataLink, backupDataLink);
+            bool copySuccess = CopyDataRecords(originalDataLink, backupDataLink);
+            if (!copySuccess)
+            {
+                log.Error(String.Format("Error backing up Blaise data - {0}/{1}", serverPark.Name, instrument.Name));
+                return;
+            }
 
-            string[] filesToMove = { instrument + "_BACKUP.bdix", instrument + "_BACKUP.bdbx" };
+            string[] filesToMove = { instrument.Name + "_BACKUP.bdix", instrument.Name + "_BACKUP.bdbx" };
 
             //Drop the datalink objects out of scope to free up the resources.
             originalDataLink = null;
             backupDataLink = null;
 
-            bool success = MoveDataToFolder(instrument, directory, "C:\\BlaiseBackup", filesToMove);
+            bool success = MoveDataToFolder(instrument.Name, directory, "C:\\BlaiseBackup", filesToMove);
 
             if (success)
-                log.Info(String.Format("Successfully backed up Blaise data - {0}/{1}", serverPark, instrument));
+                log.Info(String.Format("Successfully backed up Blaise data - {0}/{1}", serverPark.Name, instrument.Name));
             else
-                log.Error(String.Format("Error backing up Blaise data - {0}/{1}", serverPark, instrument));
+                log.Error(String.Format("Error backing up Blaise data - {0}/{1}", serverPark.Name, instrument.Name));
         }
 
         /// <summary>
@@ -219,31 +253,47 @@ namespace BlaiseCaseBackup
         /// <returns></returns>
         public string CreateBackupFile(string instrument, string directory, string bdixFileName, string bmixFileName)
         {
-            // Get an empty IDataInterface:
-            DataInterfaceAPI.IDataInterface di = DataInterfaceAPI.DataInterfaceManager.GetDataInterface();
+            try
+            {
+                // Get an empty IDataInterface:
+                DataInterfaceAPI.IDataInterface di = DataInterfaceAPI.DataInterfaceManager.GetDataInterface();
 
-            // Fill the ConnectionInfo:
-            di.ConnectionInfo.DataSourceType = DataInterfaceAPI.DataSourceType.Blaise;
-            di.ConnectionInfo.DataProviderType = DataInterfaceAPI.DataProviderType.BlaiseDataProviderForDotNET;
+                // Fill the ConnectionInfo:
+                di.ConnectionInfo.DataSourceType = DataInterfaceAPI.DataSourceType.Blaise;
+                di.ConnectionInfo.DataProviderType = DataInterfaceAPI.DataProviderType.BlaiseDataProviderForDotNET;
 
-            //SpecifyDataPartitionType:
-            di.DataPartitionType = DataInterfaceAPI.DataPartitionType.Stream;
+                //SpecifyDataPartitionType:
+                di.DataPartitionType = DataInterfaceAPI.DataPartitionType.Stream;
 
-            // Create a connection string using IBlaiseConnectionStringBuilder
-            DataInterfaceAPI.IBlaiseConnectionStringBuilder csb = DataInterfaceAPI.DataInterfaceManager.GetBlaiseConnectionStringBuilder();
-            csb.DataSource = directory + "\\" + instrument + "_BACKUP.bdbx";
+                // Create a connection string using IBlaiseConnectionStringBuilder
+                DataInterfaceAPI.IBlaiseConnectionStringBuilder csb = DataInterfaceAPI.DataInterfaceManager.GetBlaiseConnectionStringBuilder();
+                csb.DataSource = directory + "\\" + instrument + "_BACKUP.bdbx";
 
-            di.ConnectionInfo.SetConnectionString(csb.ConnectionString);
+                di.ConnectionInfo.SetConnectionString(csb.ConnectionString);
 
-            // Specify file name of data model and bdix:
-            di.DatamodelFileName = bmixFileName;
-            di.FileName = directory + "\\" + instrument + "_BACKUP.bdix";
-            // Create table definitions and database objects:
-            di.CreateTableDefinitions();
-            di.CreateDatabaseObjects(null, true);
-            di.SaveToFile(true);
+                // Specify file name of data model and bdix:
+                di.DatamodelFileName = bmixFileName;
+                di.FileName = directory + "\\" + instrument + "_BACKUP.bdix";
 
-            return di.FileName;
+                // Create table definitions and database objects:
+                di.CreateTableDefinitions();
+
+                // Reset the datasource reference to be in local space.
+                csb.DataSource = instrument + "_BACKUP.bdbx";
+                di.ConnectionInfo.SetConnectionString(csb.ConnectionString);
+
+                di.CreateDatabaseObjects(null, true);
+                di.SaveToFile(true);
+
+                return di.FileName;
+            }
+            catch (Exception e)
+            {
+                log.Error("Error creating backup objects.");
+                log.Error(e.Message);
+                log.Error(e.StackTrace);
+                return null;
+            }
         }
 
         /// <summary>
@@ -251,12 +301,23 @@ namespace BlaiseCaseBackup
         /// </summary>
         /// <param name="bdiFile">The name of the target data file (.bdix).</param>
         /// <returns>A IDatalink connection object user to access the stored Blaise data.</returns>
-        public DataLinkAPI.IDataLink GetDataLinkFromBDI(string bdiFile)
+        public IDataLink GetDataLinkFromBDI(string bdiFile)
         {
             try
             {
                 var dl = DataLinkAPI.DataLinkManager.GetDataLink(bdiFile);
-                return dl;
+                if (dl.RecordCount.GetType() == typeof(int))
+                {
+                    return dl;
+                }
+                else
+                {
+                    log.Error("Error Getting DataLink");
+                    log.Error("Invalid datalink type : " + dl.RecordCount.GetType());
+                    log.Error("Datalink value : " + dl.RecordCount);
+                    return null;
+                }
+
             }
             catch(Exception e)
             {
@@ -272,27 +333,30 @@ namespace BlaiseCaseBackup
         /// </summary>
         /// <param name="originalDL">A datalink object referencing the source data location.</param>
         /// <param name="backupDL">A datalink object referencing the backup data location.</param>
-        public void CopyDataRecords(DataLinkAPI.IDataLink originalDL, DataLinkAPI.IDataLink backupDL)
+        public bool CopyDataRecords(IDataLink originalDL, IDataLink backupDL)
         {
             try
             {
-                DataLinkAPI.IDataSet ds = originalDL.Read("");
+                IDataSet ds = originalDL.Read("");
 
                 while (!ds.EndOfSet)
                 {
                     // Read the current record and write it to the backup database:
                     var dr = ds.ActiveRecord;
-                    backupDL.Write(dr);
+                    if(dr != null)
+                        backupDL.Write(dr);
 
                     // Move to the next record:
                     ds.MoveNext();
                 }
+                return true;
             }
             catch (Exception e)
             {
                 log.Error("Error Copying data records.");
                 log.Error(e.Message);
                 log.Error(e.StackTrace);
+                return false;
             }
         }
 
@@ -376,6 +440,39 @@ namespace BlaiseCaseBackup
                 password.AppendChar(c);
             }
             return password;
+        }
+
+        /// <summary>
+        /// Method for connecting to Blaise data sets.
+        /// </summary>
+        /// /// <param name="hostname">The name of the hostname.</param>
+        /// <param name="instrumentName">The name of the instrument.</param>
+        /// <param name="serverPark">The name of the server park.</param>
+        /// <returns> IDataLink4 object for the connected server park.</returns>
+        public static IDataLink4 GetRemoteDataLink(ServerManagerAPI.IServerPark serverPark, ServerManagerAPI.ISurvey instrument)
+        {
+            string serverName = ConfigurationManager.AppSettings["BlaiseServerHostName"];
+            string userName = ConfigurationManager.AppSettings["BlaiseServerUserName"];
+            string password = ConfigurationManager.AppSettings["BlaiseServerPassword"];
+
+            // Get the GIID of the instrument.
+            Guid instrumentID = Guid.NewGuid();
+            try
+            {
+                instrumentID = instrument.InstrumentID;
+
+                // Connect to the data.
+                IRemoteDataServer dataLinkConn = DataLinkManager.GetRemoteDataServer(serverName, 8033, userName, GetPassword(password));
+
+                return dataLinkConn.GetDataLink(instrumentID, serverPark.Name);
+            }
+            catch (Exception e)
+            {
+                log.Error("Error connecting to remote data link.");
+                log.Error(e.Message);
+                log.Error(e.StackTrace);
+                return null;
+            }
         }
 
     }
