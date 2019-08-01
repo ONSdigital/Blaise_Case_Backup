@@ -13,7 +13,7 @@ namespace BlaiseCaseBackup_UnitTests
         public void Test_Get_Data_File_Name()
         {
             var b = new BlaiseCaseBackup.BlaiseCaseBackup();
-            string dfName = b.GetDataFileName("LocalDevelopment", "HealthSurvey");
+            string dfName = b.GetDataFileName("LocalDevelopment", "OPN1901A");
 
             Assert.AreNotEqual("", dfName);
         }
@@ -40,7 +40,7 @@ namespace BlaiseCaseBackup_UnitTests
         public void Test_Get_Meta_File_Name()
         {
             var b = new BlaiseCaseBackup.BlaiseCaseBackup();
-            string mfName = b.GetMetaFileName("LocalDevelopment", "HealthSurvey");
+            string mfName = b.GetMetaFileName("LocalDevelopment", "OPN1901A");
 
             Assert.AreNotEqual("", mfName);
         }
@@ -69,9 +69,10 @@ namespace BlaiseCaseBackup_UnitTests
             string serverName = ConfigurationManager.AppSettings.Get("BlaiseServerHostName");
             string username = ConfigurationManager.AppSettings.Get("BlaiseServerUserName");
             string password = ConfigurationManager.AppSettings.Get("BlaiseServerPassword");
+            string binding = ConfigurationManager.AppSettings["BlaiseServerBinding"];
 
             var b = new BlaiseCaseBackup.BlaiseCaseBackup();
-            var connection = b.ConnectToBlaiseServer(serverName, username, password);
+            var connection = b.ConnectToBlaiseServer(serverName, username, password, binding);
 
             Assert.AreNotEqual(null, connection);
         }
@@ -82,9 +83,10 @@ namespace BlaiseCaseBackup_UnitTests
             string serverName = ConfigurationManager.AppSettings.Get("BlaiseServerHostName");
             string username = ConfigurationManager.AppSettings.Get("BlaiseServerUserName");
             string password = "BadPassword";
+            string binding = ConfigurationManager.AppSettings["BlaiseServerBinding"];
 
             var b = new BlaiseCaseBackup.BlaiseCaseBackup();
-            var connection = b.ConnectToBlaiseServer(serverName, username, password);
+            var connection = b.ConnectToBlaiseServer(serverName, username, password, binding);
 
             Assert.AreEqual(null, connection);
         }
@@ -95,9 +97,10 @@ namespace BlaiseCaseBackup_UnitTests
             string serverName = ConfigurationManager.AppSettings.Get("BlaiseServerHostName");
             string username = "BadUser";
             string password = ConfigurationManager.AppSettings.Get("BlaiseServerPassword");
+            string binding = ConfigurationManager.AppSettings["BlaiseServerBinding"];
 
             var b = new BlaiseCaseBackup.BlaiseCaseBackup();
-            var connection = b.ConnectToBlaiseServer(serverName, username, password);
+            var connection = b.ConnectToBlaiseServer(serverName, username, password, binding);
 
             Assert.AreEqual(null, connection);
         }
@@ -108,9 +111,10 @@ namespace BlaiseCaseBackup_UnitTests
             string serverName = "BadServer";
             string username = ConfigurationManager.AppSettings.Get("BlaiseServerUserName");
             string password = ConfigurationManager.AppSettings.Get("BlaiseServerPassword");
+            string binding = ConfigurationManager.AppSettings["BlaiseServerBinding"];
 
             var b = new BlaiseCaseBackup.BlaiseCaseBackup();
-            var connection = b.ConnectToBlaiseServer(serverName, username, password);
+            var connection = b.ConnectToBlaiseServer(serverName, username, password, binding);
 
             Assert.AreEqual(null, connection);
         }
@@ -131,6 +135,11 @@ namespace BlaiseCaseBackup_UnitTests
             var b = new BlaiseCaseBackup.BlaiseCaseBackup();
 
             string currentDir = Directory.GetCurrentDirectory() + "\\MoveFolder";
+
+            if (!Directory.Exists(currentDir))
+            {
+                Directory.CreateDirectory(currentDir);
+            }
 
             string[] files = { "testFile1.txt", "testFile2.txt" };
 
@@ -166,7 +175,7 @@ namespace BlaiseCaseBackup_UnitTests
             var b = new BlaiseCaseBackup.BlaiseCaseBackup();
 
             string serverPark = "LocalDevelopment";
-            string instrument = "HealthSurvey";
+            string instrument = "OPN1901A";
             // Get the BMI and BDI files for the survey:
             string originalBDI = b.GetDataFileName(serverPark, instrument);
 

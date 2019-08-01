@@ -74,12 +74,13 @@ namespace BlaiseCaseBackup
             string serverName = ConfigurationManager.AppSettings["BlaiseServerHostName"];
             string userName = ConfigurationManager.AppSettings["BlaiseServerUserName"];
             string password = ConfigurationManager.AppSettings["BlaiseServerPassword"];
+            string binding = ConfigurationManager.AppSettings["BlaiseServerBinding"];
 
             ServerManagerAPI.IConnectedServer serverManagerConnection = null;
             try
             {
                 log.Info("Attempting to connect to Blaise Server Manager.");
-                serverManagerConnection = ServerManagerAPI.ServerManager.ConnectToServer(serverName, 8031, userName, GetPassword(password));
+                serverManagerConnection = ServerManagerAPI.ServerManager.ConnectToServer(serverName, 8031, userName, GetPassword(password), binding);
             }
             catch (Exception e)
             {
@@ -175,8 +176,9 @@ namespace BlaiseCaseBackup
                 string serverName = ConfigurationManager.AppSettings.Get("BlaiseServerHostName");
                 string username = ConfigurationManager.AppSettings.Get("BlaiseServerUserName");
                 string password = ConfigurationManager.AppSettings.Get("BlaiseServerPassword");
+                string binding = ConfigurationManager.AppSettings["BlaiseServerBinding"];
 
-                var connection = ConnectToBlaiseServer(serverName, username, password);
+                var connection = ConnectToBlaiseServer(serverName, username, password, binding);
 
 
                 var surveys = connection.GetSurveys(serverPark);
@@ -216,8 +218,9 @@ namespace BlaiseCaseBackup
                 string serverName = ConfigurationManager.AppSettings.Get("BlaiseServerHostName");
                 string username = ConfigurationManager.AppSettings.Get("BlaiseServerUserName");
                 string password = ConfigurationManager.AppSettings.Get("BlaiseServerPassword");
+                string binding = ConfigurationManager.AppSettings["BlaiseServerBinding"];
 
-                var connection = ConnectToBlaiseServer(serverName, username, password);
+                var connection = ConnectToBlaiseServer(serverName, username, password, binding);
 
                 var surveys = connection.GetSurveys(serverPark);
 
@@ -407,13 +410,13 @@ namespace BlaiseCaseBackup
         /// <param name="userName">Username with access to the specified server.</param>
         /// <param name="password">Password for the specified user to access the server.</param>
         /// <returns>A IConnectedServer2 object which is connected to the server provided.</returns>
-        public ServerManagerAPI.IConnectedServer2 ConnectToBlaiseServer(string serverName, string userName, string password)
+        public ServerManagerAPI.IConnectedServer2 ConnectToBlaiseServer(string serverName, string userName, string password, string binding)
         {
             int port = 8031;
             try
             {
                 ServerManagerAPI.IConnectedServer2 connServer =
-                    (ServerManagerAPI.IConnectedServer2)ServerManagerAPI.ServerManager.ConnectToServer(serverName, port, userName, GetPassword(password));
+                    (ServerManagerAPI.IConnectedServer2)ServerManagerAPI.ServerManager.ConnectToServer(serverName, port, userName, GetPassword(password), binding);
 
                 return connServer;
             }
@@ -454,6 +457,7 @@ namespace BlaiseCaseBackup
             string serverName = ConfigurationManager.AppSettings["BlaiseServerHostName"];
             string userName = ConfigurationManager.AppSettings["BlaiseServerUserName"];
             string password = ConfigurationManager.AppSettings["BlaiseServerPassword"];
+            string binding = ConfigurationManager.AppSettings["BlaiseServerBinding"];
 
             // Get the GIID of the instrument.
             Guid instrumentID = Guid.NewGuid();
@@ -462,7 +466,7 @@ namespace BlaiseCaseBackup
                 instrumentID = instrument.InstrumentID;
 
                 // Connect to the data.
-                IRemoteDataServer dataLinkConn = DataLinkManager.GetRemoteDataServer(serverName, 8033, userName, GetPassword(password));
+                IRemoteDataServer dataLinkConn = DataLinkManager.GetRemoteDataServer(serverName, 8033, binding, userName, GetPassword(password));
 
                 return dataLinkConn.GetDataLink(instrumentID, serverPark.Name);
             }
