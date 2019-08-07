@@ -43,8 +43,8 @@
             this.serviceInstaller1.AfterInstall += new System.Configuration.Install.InstallEventHandler(this.serviceInstaller1_AfterInstall);
 
 
-            this.serviceInstaller1.Description = "Periodically saves local Blaise database data to a backup location.";
-            this.serviceInstaller1.DisplayName = "Blaise.CaseBackup";
+            this.serviceInstaller1.Description = "### BlaiseCaseBackup";
+            this.serviceInstaller1.DisplayName = "BlaiseCaseBackup";
             this.serviceInstaller1.ServiceName = "BlaiseCaseBackup";
             this.serviceInstaller1.AfterInstall += new System.Configuration.Install.InstallEventHandler(this.serviceInstaller1_AfterInstall);
             // 
