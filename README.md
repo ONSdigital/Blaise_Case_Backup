@@ -1,7 +1,6 @@
 # Blaise_Case_Backup
 
-The Blaise Case Backup application is a Windows service that runs on a virtual machine hosting a Blaise 5 server.
-The application works on a timer and preiodically saves a copy of all of the case data from the Blaise system to a backup location on the local drive. This data is then overwritten each time the system is backed up.
+Blaise Case Backup is a Windows service for backing up Blaise databases. The service works on a timer and preiodically saves a copy of all the cases in a Blaise database to a local location. The backed up data is overwritten each time the service is run.
 
 # Setup Development Environment
 
