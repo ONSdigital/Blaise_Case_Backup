@@ -142,6 +142,7 @@ namespace BlaiseCaseBackup
                 return;
             }
 
+
             string[] filesToMove = { instrument.Name + "_BACKUP.bdix", instrument.Name + "_BACKUP.bdbx" };
 
             //Drop the datalink objects out of scope to free up the resources.
