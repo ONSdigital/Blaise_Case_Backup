@@ -1,23 +1,16 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Diagnostics;
 using System.Linq;
 using System.Security;
 using System.ServiceProcess;
 using DataInterfaceAPI = StatNeth.Blaise.API.DataInterface;
 using ServerManagerAPI = StatNeth.Blaise.API.ServerManager;
 using DataLinkAPI = StatNeth.Blaise.API.DataLink;
-using System.Text;
-using System.Threading.Tasks;
 using System.IO;
 using System.Configuration;
 using log4net;
 using System.Timers;
 using System.Globalization;
 using StatNeth.Blaise.API.DataLink;
-using StatNeth.Blaise.API.ServerManager;
 
 namespace BlaiseCaseBackup
 {
