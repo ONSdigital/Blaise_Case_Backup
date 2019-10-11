@@ -16,11 +16,11 @@ namespace BlaiseCaseBackup
         {
 #if DEBUG
 
-            log.Info("Blaise Case Creator service starting in DEBUG mode.");
+            log.Info("Blaise Case Backup service starting in DEBUG mode.");
             BlaiseCaseBackup bcbService = new BlaiseCaseBackup();
             bcbService.OnDebug();
 #else
-            log.Info("Blaise Case Creator service starting in RELEASE mode.");
+            log.Info("Blaise Case Backup service starting in RELEASE mode.");
             ServiceBase[] ServicesToRun;
             ServicesToRun = new ServiceBase[]
             {
