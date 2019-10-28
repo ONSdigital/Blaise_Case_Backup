@@ -51,13 +51,11 @@
     <Reference Include="Microsoft.VisualStudio.TestPlatform.TestFramework.Extensions, Version=14.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
       <HintPath>..\packages\MSTest.TestFramework.1.3.2\lib\net45\Microsoft.VisualStudio.TestPlatform.TestFramework.Extensions.dll</HintPath>
     </Reference>
-    <Reference Include="StatNeth.Blaise.API.DataLink, Version=5.0.0.0, Culture=neutral, PublicKeyToken=ad2ddd432cb2a452, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\..\..\..\..\Program Files (x86)\StatNeth\Blaise5\Bin\StatNeth.Blaise.API.DataLink.dll</HintPath>
+    <Reference Include="StatNeth.Blaise.API.DataLink">
+      <HintPath>..\..\Blaise_Case_Updater\BlaiseDLLs\StatNeth.Blaise.API.DataLink.dll</HintPath>
     </Reference>
-    <Reference Include="StatNeth.Blaise.API.ServerManager, Version=5.0.0.0, Culture=neutral, PublicKeyToken=ad2ddd432cb2a452, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\..\..\..\..\Program Files (x86)\StatNeth\Blaise5\Bin\StatNeth.Blaise.API.ServerManager.dll</HintPath>
+    <Reference Include="StatNeth.Blaise.API.ServerManager">
+      <HintPath>..\..\Blaise_Case_Updater\BlaiseDLLs\StatNeth.Blaise.API.ServerManager.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.ComponentModel.DataAnnotations" />
