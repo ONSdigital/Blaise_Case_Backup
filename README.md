@@ -1,12 +1,13 @@
 # Blaise_Case_Backup
 
-Blaise Case Backup is a Windows service for backing up Blaise databases. The service works on a timer and preiodically saves a copy of all the databases on a Blaise server park to a local location. The backed up data is overwritten each time the service is run.
+Blaise Case Backup is a Windows service for backing up Blaise databases. The service works on a timer and periodically saves a copy of all the databases on a Blaise server park to a local location. 
+The backed up data is overwritten each time the service is run.
 
 # Setup Development Environment
 
-Clone the git respository to your IDE of choice. Visual Studio 2019 is recomended.
+Clone the git repository to your IDE of choice. Visual Studio 2019 is recommended.
 
-Populate the key values in the App.config file accordingly. **Never committ App.config with key values.**
+Populate the key values in the App.config file accordingly. **Never commit App.config with key values.**
 
 Build the solution to obtain the necessary references.
 
