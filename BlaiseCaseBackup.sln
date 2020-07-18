@@ -1,11 +1,11 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 15
-VisualStudioVersion = 15.0.28307.329
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.30011.22
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BlaiseCaseBackup", "BlaiseCaseBackup\BlaiseCaseBackup.csproj", "{73BDED70-C27B-49C1-ABA7-A2E01B7ED675}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BlaiseCaseBackup_UnitTests", "BlaiseCaseBackup_UnitTests\BlaiseCaseBackup_UnitTests.csproj", "{80A12F89-01A2-47B4-8143-475DFCBE987E}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BlaiseCaseBackup.Tests", "BlaiseCaseBackup.Tests\BlaiseCaseBackup.Tests.csproj", "{80A12F89-01A2-47B4-8143-475DFCBE987E}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
