@@ -22,18 +22,22 @@ namespace BlaiseCaseBackup.Services
 
         public void BackupSurveys()
         {
-            foreach (var survey in _blaiseApi.Surveys)
+            foreach (var survey in 
+                _blaiseApi
+                    .WithConnection(_blaiseApi.DefaultConnection)
+                    .Surveys)
             {
                 _logger.Info($"Processing survey '{survey.Name}' for server park '{survey.ServerPark}'");
 
                 _blaiseApi
+                    .WithConnection(_blaiseApi.DefaultConnection)
                     .WithInstrument(survey.Name)
                     .WithServerPark(survey.ServerPark)
                     .Survey
-                    .ToPath(_configurationProvider.BackupPath)
+                    .ToBucket(_configurationProvider.BucketName)
                     .Backup();
 
-                _logger.Info($"Backed up survey '{survey.Name}' for server park '{survey.ServerPark}' to file '{_configurationProvider.BackupPath}'");
+                _logger.Info($"Backed up survey '{survey.Name}' for server park '{survey.ServerPark}' to bucket '{_configurationProvider.BucketName}'");
             }
         }
     }

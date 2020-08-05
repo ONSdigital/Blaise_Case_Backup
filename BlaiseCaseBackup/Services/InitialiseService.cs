@@ -23,14 +23,15 @@ namespace BlaiseCaseBackup.Services
 
         public void Start()
         {
-            var timerIntervalInMinutes = _configurationProvider.TimerIntervalInMinutes;
-            var time = double.Parse(timerIntervalInMinutes, CultureInfo.InvariantCulture.NumberFormat);
-            time = time * 60 * 1000;
+            _backupSurveysService.BackupSurveys();
+            //var timerIntervalInMinutes = _configurationProvider.TimerIntervalInMinutes;
+            //var time = double.Parse(timerIntervalInMinutes, CultureInfo.InvariantCulture.NumberFormat);
+            //time = time * 60 * 1000;
 
-            // Set up a timer that triggers every minute.
-            var timer = new Timer { Interval = time };
-            timer.Elapsed += BackupSurveys;
-            timer.Start();
+            //// Set up a timer that triggers every minute.
+            //var timer = new Timer { Interval = time };
+            //timer.Elapsed += BackupSurveys;
+            //timer.Start();
 
             _logger.Info("Blaise Case Backup service started.");
         }

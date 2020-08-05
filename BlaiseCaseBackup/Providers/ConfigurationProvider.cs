@@ -7,6 +7,6 @@ namespace BlaiseCaseBackup.Providers
     {
         public string TimerIntervalInMinutes => ConfigurationManager.AppSettings["TimerIntervalInMinutes"];
 
-        public string BackupPath => ConfigurationManager.AppSettings["BackupPath"];
+        public string BucketName => ConfigurationManager.AppSettings["BucketName"];
     }
 }
