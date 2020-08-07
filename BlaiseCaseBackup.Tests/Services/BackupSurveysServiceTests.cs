@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using Blaise.Nuget.Api.Contracts.Interfaces;
+using Blaise.Nuget.Api.Contracts.Models;
 using BlaiseCaseBackup.Interfaces;
 using BlaiseCaseBackup.Services;
 using log4net;
@@ -33,10 +34,12 @@ namespace BlaiseCaseBackup.Tests.Services
         {
             _loggingMock = new Mock<ILog>();
             _blaiseApiMock = new Mock<IFluentBlaiseApi>();
+            _blaiseApiMock.Setup(b => b.WithConnection(It.IsAny<ConnectionModel>())).Returns(_blaiseApiMock.Object);
             _blaiseApiMock.Setup(b => b.WithInstrument(It.IsAny<string>())).Returns(_blaiseApiMock.Object);
             _blaiseApiMock.Setup(b => b.WithServerPark(It.IsAny<string>())).Returns(_blaiseApiMock.Object);
 
-            _blaiseApiMock.Setup(b => b.Survey.ToPath(It.IsAny<string>()).Backup());
+            _blaiseApiMock.Setup(b => b.Survey.ToBucket(It.IsAny<string>())).Returns(_blaiseApiMock.Object as IFluentBlaiseSurveyApi);
+            _blaiseApiMock.Setup(b => b.Survey.ToBucket(It.IsAny<string>()).Backup());
 
             _configurationProviderMock = new Mock<IConfigurationProvider>();
             _configurationProviderMock.Setup(c => c.BucketName).Returns(_bucketName);
