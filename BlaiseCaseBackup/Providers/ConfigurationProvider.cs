@@ -1,4 +1,5 @@
-﻿using System.Configuration;
+﻿using System;
+using System.Configuration;
 using BlaiseCaseBackup.Interfaces;
 
 namespace BlaiseCaseBackup.Providers
@@ -8,5 +9,7 @@ namespace BlaiseCaseBackup.Providers
         public string TimerIntervalInMinutes => ConfigurationManager.AppSettings["TimerIntervalInMinutes"];
 
         public string BucketName => ConfigurationManager.AppSettings["BucketName"];
+
+        public string VmName => Environment.MachineName;
     }
 }

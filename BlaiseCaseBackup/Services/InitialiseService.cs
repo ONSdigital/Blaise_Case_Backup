@@ -32,12 +32,12 @@ namespace BlaiseCaseBackup.Services
             timer.Elapsed += BackupSurveys;
             timer.Start();
 
-            _logger.Info("Blaise Case Backup service started.");
+            _logger.Info($"Blaise Case Backup service started on '{_configurationProvider.VmName}'");
         }
 
         public void Stop()
         {
-            _logger.Info("Blaise Case Backup service stopped.");
+            _logger.Info($"Blaise Case Backup service stopped  on '{_configurationProvider.VmName}'");
         }
 
         private void BackupSurveys(object sender, ElapsedEventArgs args)

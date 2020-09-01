@@ -4,5 +4,7 @@
     {
         string TimerIntervalInMinutes { get; }
         string BucketName { get; }
+
+        string VmName { get; }
     }
 }

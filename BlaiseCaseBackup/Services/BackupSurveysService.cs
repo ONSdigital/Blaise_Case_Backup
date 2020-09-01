@@ -27,7 +27,7 @@ namespace BlaiseCaseBackup.Services
                     .WithConnection(_blaiseApi.DefaultConnection)
                     .Surveys)
             {
-                _logger.Info($"Processing survey '{survey.Name}' for server park '{survey.ServerPark}'");
+                _logger.Info($"Processing survey '{survey.Name}' for server park '{survey.ServerPark}' on '{_configurationProvider.VmName}'");
 
                 _blaiseApi
                     .WithConnection(_blaiseApi.DefaultConnection)
@@ -37,7 +37,7 @@ namespace BlaiseCaseBackup.Services
                     .ToBucket(_configurationProvider.BucketName)
                     .Backup();
 
-                _logger.Info($"Backed up survey '{survey.Name}' for server park '{survey.ServerPark}' to bucket '{_configurationProvider.BucketName}'");
+                _logger.Info($"Backed up survey '{survey.Name}' for server park '{survey.ServerPark}' to bucket '{_configurationProvider.BucketName}' on '{_configurationProvider.VmName}'");
             }
         }
     }
