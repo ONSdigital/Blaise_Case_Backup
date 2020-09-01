@@ -1,4 +1,6 @@
-﻿using System.ServiceProcess;
+﻿using System;
+using System.Configuration;
+using System.ServiceProcess;
 using Blaise.Nuget.Api;
 using Blaise.Nuget.Api.Contracts.Interfaces;
 using BlaiseCaseBackup.Interfaces;
@@ -17,6 +19,12 @@ namespace BlaiseCaseBackup
         {
             InitializeComponent();
             IUnityContainer unityContainer = new UnityContainer();
+
+#if (DEBUG)
+            var credentialKey = ConfigurationManager.AppSettings["GOOGLE_APPLICATION_CREDENTIALS"];
+
+            Environment.SetEnvironmentVariable("GOOGLE_APPLICATION_CREDENTIALS", credentialKey);
+#endif
 
             unityContainer.RegisterType<IConfigurationProvider, ConfigurationProvider>();
 
