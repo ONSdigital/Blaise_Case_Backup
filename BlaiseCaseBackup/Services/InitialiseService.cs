@@ -1,5 +1,5 @@
-﻿using System.Globalization;
-using System.Timers;
+﻿using System;
+using Blaise.Nuget.PubSub.Contracts.Interfaces;
 using BlaiseCaseBackup.Interfaces;
 using log4net;
 
@@ -9,40 +9,44 @@ namespace BlaiseCaseBackup.Services
     {
         private readonly ILog _logger;
         private readonly IConfigurationProvider _configurationProvider;
-        private readonly IBackupSurveysService _backupSurveysService;
+        private readonly IQueueService _queueService;
+        private readonly IMessageHandler _messageHandler;
 
         public InitialiseService(
             ILog logger,
-            IConfigurationProvider configurationProvider,
-            IBackupSurveysService backupSurveysService)
+            IQueueService queueService,
+            IMessageHandler messageHandler,
+            IConfigurationProvider configurationProvider)
         {
             _logger = logger;
+            _queueService = queueService;
+            _messageHandler = messageHandler;
             _configurationProvider = configurationProvider;
-            _backupSurveysService = backupSurveysService;
         }
 
         public void Start()
         {
-            var timerIntervalInMinutes = _configurationProvider.TimerIntervalInMinutes;
-            var time = double.Parse(timerIntervalInMinutes, CultureInfo.InvariantCulture.NumberFormat);
-            time = time * 60 * 1000;
+            _logger.Info($"Starting case backup service on '{_configurationProvider.VmName}'");
 
-            // Set up a timer that triggers every minute.
-            var timer = new Timer { Interval = time };
-            timer.Elapsed += BackupSurveys;
-            timer.Start();
+            try
+            {
+                _queueService.Subscribe(_messageHandler);
+            }
+            catch (Exception ex)
+            {
+                _logger.Error(ex);
+            }
 
-            _logger.Info($"Blaise Case Backup service started on '{_configurationProvider.VmName}'");
+            _logger.Info($"Nisra case backup service started on '{_configurationProvider.VmName}'");
         }
 
         public void Stop()
         {
-            _logger.Info($"Blaise Case Backup service stopped  on '{_configurationProvider.VmName}'");
-        }
+            _logger.Info($"Stopping case backup service on '{_configurationProvider.VmName}'");
 
-        private void BackupSurveys(object sender, ElapsedEventArgs args)
-        {
-            _backupSurveysService.BackupSurveys();
+            _queueService.CancelAllSubscriptions();
+
+            _logger.Info($"Nisra case backup service stopped on '{_configurationProvider.VmName}'");
         }
     }
 }

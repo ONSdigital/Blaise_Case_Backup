@@ -1,4 +1,6 @@
-﻿using BlaiseCaseBackup.Interfaces;
+﻿using System;
+using Blaise.Nuget.PubSub.Contracts.Interfaces;
+using BlaiseCaseBackup.Interfaces;
 using BlaiseCaseBackup.Services;
 using log4net;
 using Moq;
@@ -8,37 +10,63 @@ namespace BlaiseCaseBackup.Tests.Services
 {
     public class InitialiseServiceTests
     {
-        private Mock<ILog> _loggerMock;
+        private Mock<ILog> _loggingMock;
+        private Mock<IQueueService> _queueServiceMock;
+        private Mock<IMessageHandler> _messageHandlerMock;
         private Mock<IConfigurationProvider> _configurationProviderMock;
-        private Mock<IBackupSurveysService> _backupSurveysService;
 
         private InitialiseService _sut;
 
         [SetUp]
         public void SetUpTests()
         {
-            _loggerMock = new Mock<ILog>();
+            _loggingMock = new Mock<ILog>();
+            _queueServiceMock = new Mock<IQueueService>();
+            _messageHandlerMock = new Mock<IMessageHandler>();
             _configurationProviderMock = new Mock<IConfigurationProvider>();
-            _configurationProviderMock.Setup(c => c.TimerIntervalInMinutes).Returns("1");
-
-            _backupSurveysService = new Mock<IBackupSurveysService>();
 
             _sut = new InitialiseService(
-                _loggerMock.Object,
-                _configurationProviderMock.Object,
-                _backupSurveysService.Object);
+                _loggingMock.Object,
+                _queueServiceMock.Object,
+                _messageHandlerMock.Object,
+                _configurationProviderMock.Object);
         }
 
         [Test]
-        public void Given_I_Call_Start_Then_The_Correct_Methods_Are_Called_To_Setup_The_Service()
+        public void Given_I_Call_Start_Then_The_Correct_Methods_Are_Called_To_Setup_And_Subscribe_To_The_Appropriate_Queues()
+        {
+            //act
+            _sut.Start();
+
+            //assert
+            _queueServiceMock.Verify(v => v.Subscribe(It.IsAny<IMessageHandler>()), Times.Once);
+        }
+
+        [Test]
+        public void Given_I_Call_Start_And_An_Exception_Is_Thrown_During_The_Process_Then_The_Exception_Is_Handled()
         {
             //arrange
+            var exceptionThrown = new Exception("Error message");
+            _queueServiceMock.Setup(s => s.Subscribe(It.IsAny<IMessageHandler>())).Throws(exceptionThrown);
+            _loggingMock.Setup(l => l.Error(It.IsAny<Exception>()));
+
+            //act && assert
+            Assert.DoesNotThrow(() => _sut.Start());
+        }
+
+        [Test]
+        public void Given_I_Call_Start_And_An_Exception_Is_Thrown_During_The_Process_Then_The_Exception_Is_Logged()
+        {
+            //arrange
+            var exceptionThrown = new Exception("Error message");
+            _queueServiceMock.Setup(s => s.Subscribe(It.IsAny<IMessageHandler>())).Throws(exceptionThrown);
+            _loggingMock.Setup(l => l.Error(It.IsAny<Exception>()));
 
             //act
             _sut.Start();
 
             //assert
-            _loggerMock.Verify(v => v.Info(It.IsAny<string>()), Times.Once);
+            _loggingMock.Verify(v => v.Error(exceptionThrown), Times.Once);
         }
 
         [Test]
@@ -48,7 +76,7 @@ namespace BlaiseCaseBackup.Tests.Services
             _sut.Stop();
 
             //assert
-            _loggerMock.Verify(v => v.Info(It.IsAny<string>()), Times.Once);
+            _queueServiceMock.Verify(v => v.CancelAllSubscriptions(), Times.Once);
         }
     }
 }
