@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using Blaise.Nuget.Api.Contracts.Interfaces;
 using Blaise.Nuget.Api.Contracts.Models;
 using BlaiseCaseBackup.Interfaces;
@@ -38,8 +39,7 @@ namespace BlaiseCaseBackup.Tests.Services
             _blaiseApiMock.Setup(b => b.WithInstrument(It.IsAny<string>())).Returns(_blaiseApiMock.Object);
             _blaiseApiMock.Setup(b => b.WithServerPark(It.IsAny<string>())).Returns(_blaiseApiMock.Object);
 
-            _blaiseApiMock.Setup(b => b.Survey.ToBucket(It.IsAny<string>())).Returns(_blaiseApiMock.Object as IFluentBlaiseSurveyApi);
-            _blaiseApiMock.Setup(b => b.Survey.ToBucket(It.IsAny<string>()).Backup());
+            _blaiseApiMock.Setup(b => b.Survey.ToBucket(It.IsAny<string>()).ToPath(It.IsAny<string>()).Backup());
 
             _configurationProviderMock = new Mock<IConfigurationProvider>();
             _configurationProviderMock.Setup(c => c.BucketName).Returns(_bucketName);
@@ -75,6 +75,8 @@ namespace BlaiseCaseBackup.Tests.Services
 
             _blaiseApiMock.Setup(b => b.Surveys).Returns(new List<ISurvey> { surveyMock.Object });
 
+            var folderPath = $"{DateTime.Now.Date:yyyy-M-d}/{_serverPark}";
+
             //act
             _sut.BackupSurveys();
 
@@ -82,7 +84,7 @@ namespace BlaiseCaseBackup.Tests.Services
             _blaiseApiMock.Verify(v => v.Surveys, Times.Once);
             _blaiseApiMock.Verify(v => v.WithInstrument(_instrumentName), Times.Once);
             _blaiseApiMock.Verify(v => v.WithServerPark(_serverPark), Times.Once);
-            _blaiseApiMock.Verify(v => v.Survey.ToBucket(_bucketName).Backup(), Times.Once);
+            _blaiseApiMock.Verify(v => v.Survey.ToBucket(_bucketName).ToPath(folderPath).Backup(), Times.Once);
         }
     }
 }

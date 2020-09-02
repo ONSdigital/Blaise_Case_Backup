@@ -37,7 +37,7 @@ namespace BlaiseCaseBackup.Services
                 _logger.Error(ex);
             }
 
-            _logger.Info($"Nisra case backup service started on '{_configurationProvider.VmName}'");
+            _logger.Info($"Starting case backup service started on '{_configurationProvider.VmName}'");
         }
 
         public void Stop()
@@ -46,7 +46,7 @@ namespace BlaiseCaseBackup.Services
 
             _queueService.CancelAllSubscriptions();
 
-            _logger.Info($"Nisra case backup service stopped on '{_configurationProvider.VmName}'");
+            _logger.Info($"Starting case backup service stopped on '{_configurationProvider.VmName}'");
         }
     }
 }
