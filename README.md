@@ -3,13 +3,26 @@
 Blaise Case Backup is a Windows service for backing up Blaise databases. The service works on a timer and periodically saves a copy of all the databases on a Blaise server park to a local location. 
 The backed up data is overwritten each time the service is run.
 
+Blaise Case Backup is a Windows service for backing up Blaise databases. The service is triggered by listening for a message on the 'case-backup-action-topic' topic in PubSub in GCP. The all surveys containing the cases
+on all available server parks on the VM are backed up to a bucket in GCP
+
+# Example message
+```
+{"action": "backup"}
+```
+
 # Setup Development Environment
 
 Clone the git repository to your IDE of choice. Visual Studio 2019 is recommended.
 
-Populate the key values in the App.config file accordingly. **Never commit App.config with key values.**
+Populate the key values in the App.config file accordingly. **Never committ App.config with key values.**
 
 Build the solution to obtain the necessary references.
+
+#Topics & Subscriptions
+This service listens to case-backup-action-subscription
+
+This service does not publish any messages
 
 # Installing the Service
 
