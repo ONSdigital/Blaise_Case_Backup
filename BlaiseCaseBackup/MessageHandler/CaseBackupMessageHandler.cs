@@ -6,13 +6,13 @@ using log4net;
 
 namespace BlaiseCaseBackup.MessageHandler
 {
-    public class CaseMonitorMessageHandler : IMessageHandler
+    public class CaseBackupMessageHandler : IMessageHandler
     {
         private readonly ILog _logger;
         private readonly IServiceActionMapper _mapper;
         private readonly IBackupSurveysService _backupSurveysService;
 
-        public CaseMonitorMessageHandler(
+        public CaseBackupMessageHandler(
             ILog logger, 
             IServiceActionMapper mapper, 
             IBackupSurveysService backupSurveysService)

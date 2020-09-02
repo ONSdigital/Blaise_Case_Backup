@@ -18,7 +18,7 @@ namespace BlaiseCaseBackup.Tests.MessageHandler
         private readonly string _message;
         private readonly CaseBackupActionModel _actionModel;
 
-        private CaseMonitorMessageHandler _sut;
+        private CaseBackupMessageHandler _sut;
 
         public CaseBackupMessageHandlerTests()
         {
@@ -36,7 +36,7 @@ namespace BlaiseCaseBackup.Tests.MessageHandler
             _mapperMock = new Mock<IServiceActionMapper>();
             _mapperMock.Setup(m => m.MapToCaseBackupActionModel(_message)).Returns(_actionModel);
 
-            _sut = new CaseMonitorMessageHandler(
+            _sut = new CaseBackupMessageHandler(
                 _loggingMock.Object,
                 _mapperMock.Object,
                 _backupSurveysServiceMock.Object);

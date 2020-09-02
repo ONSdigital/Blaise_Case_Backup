@@ -230,7 +230,7 @@
     <Compile Include="Interfaces\IQueueService.cs" />
     <Compile Include="Interfaces\IServiceActionMapper.cs" />
     <Compile Include="Mappers\ServiceActionMapper.cs" />
-    <Compile Include="MessageHandler\CaseMonitorMessageHandler.cs" />
+    <Compile Include="MessageHandler\CaseBackupMessageHandler.cs" />
     <Compile Include="Models\CaseBackupActionModel.cs" />
     <Compile Include="ProjectInstaller.cs">
       <SubType>Component</SubType>

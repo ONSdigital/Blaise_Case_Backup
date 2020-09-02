@@ -75,6 +75,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="BlaiseCaseBackupTests.cs" />
     <Compile Include="Mappers\ServiceActionMapperTests.cs" />
     <Compile Include="MessageHandler\CaseBackupMessageHandlerTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
