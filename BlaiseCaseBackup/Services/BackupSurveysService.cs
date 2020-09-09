@@ -37,8 +37,8 @@ namespace BlaiseCaseBackup.Services
                     .WithInstrument(survey.Name)
                     .WithServerPark(survey.ServerPark)
                     .Survey
+                    .ToPath(_configurationProvider.LocalBackupFolder)
                     .ToBucket(_configurationProvider.BucketName)
-                    .ToPath(folderPath)
                     .Backup();
 
                 _logger.Info($"Backed up survey '{survey.Name}' for server park '{survey.ServerPark}' to bucket '{_configurationProvider.BucketName}' on '{_configurationProvider.VmName}'");
