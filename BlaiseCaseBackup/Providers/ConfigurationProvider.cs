@@ -20,6 +20,5 @@ namespace BlaiseCaseBackup.Providers
         public string DeadletterTopicId => ConfigurationManager.AppSettings["DeadletterTopicId"];
 
         public string LocalBackupFolder => ConfigurationManager.AppSettings["LocalBackupFolder"];
-
     }
 }

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.IO;
 using Blaise.Nuget.Api.Contracts.Interfaces;
 using BlaiseCaseBackup.Interfaces;
 using log4net;
@@ -30,6 +31,7 @@ namespace BlaiseCaseBackup.Services
             {
                 _logger.Info($"Processing survey '{survey.Name}' for server park '{survey.ServerPark}' on '{_configurationProvider.VmName}'");
 
+                var localFolderPath = $"{_configurationProvider.LocalBackupFolder}/{survey.ServerPark}";
                 var folderPath = $"{DateTime.Now.Date:yyyy-M-d}/{survey.ServerPark}";
 
                 _blaiseApi
@@ -37,8 +39,8 @@ namespace BlaiseCaseBackup.Services
                     .WithInstrument(survey.Name)
                     .WithServerPark(survey.ServerPark)
                     .Survey
-                    .ToPath(_configurationProvider.LocalBackupFolder)
-                    .ToBucket(_configurationProvider.BucketName)
+                    .ToPath(localFolderPath)
+                    .ToBucket(_configurationProvider.BucketName, folderPath)
                     .Backup();
 
                 _logger.Info($"Backed up survey '{survey.Name}' for server park '{survey.ServerPark}' to bucket '{_configurationProvider.BucketName}' on '{_configurationProvider.VmName}'");
