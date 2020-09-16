@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using Blaise.Nuget.Api.Contracts.Interfaces;
 using Blaise.Nuget.Api.Contracts.Models;
 using BlaiseCaseBackup.Interfaces;
@@ -81,7 +80,7 @@ namespace BlaiseCaseBackup.Tests.Services
             _blaiseApiMock.Setup(b => b.Surveys).Returns(new List<ISurvey> { surveyMock.Object });
 
             var localFolderPath = $"{_localBackupPath}/{_serverPark}";
-            var folderPath = $"{DateTime.Now.Date:yyyy-M-d}/{_serverPark}";
+            var folderPath = $"{_serverPark}";
 
             //act
             _sut.BackupSurveys();
