@@ -30,7 +30,7 @@ namespace BlaiseCaseBackup.Services
             {
                 _logger.Info($"Processing survey '{survey.Name}' for server park '{survey.ServerPark}' on '{_configurationProvider.VmName}'");
 
-                var folderPath = $"{DateTime.Now.Date:yyyy-M-d}/{survey.ServerPark}";
+                var folderPath = $"{survey.ServerPark}";
 
                 _blaiseApi
                     .WithConnection(_blaiseApi.DefaultConnection)
