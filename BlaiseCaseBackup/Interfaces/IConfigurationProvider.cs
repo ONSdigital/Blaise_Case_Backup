@@ -13,5 +13,7 @@
         string SubscriptionId { get; }
 
         string DeadletterTopicId { get; }
+
+        string LocalBackupFolder { get; }
     }
 }

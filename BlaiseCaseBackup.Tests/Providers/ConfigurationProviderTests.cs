@@ -70,5 +70,18 @@ namespace BlaiseCaseBackup.Tests.Providers
             //assert
             Assert.AreEqual("DeadletterTopicIdTest", result);
         }
+
+        [Test]
+        public void Given_I_Call_LocalBackupFolder_I_Get_The_Correct_Value_Back()
+        {
+            //arrange
+            var configurationProvider = new ConfigurationProvider();
+
+            //act
+            var result = configurationProvider.LocalBackupFolder;
+
+            //assert
+            Assert.AreEqual("LocalBackupFolderTest", result);
+        }
     }
 }
