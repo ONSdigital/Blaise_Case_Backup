@@ -2,7 +2,18 @@
 {
     public interface IConfigurationProvider
     {
-        string TimerIntervalInMinutes { get; }
         string BucketName { get; }
+
+        string VmName { get; }
+
+        string ProjectId { get; }
+
+        string SubscriptionTopicId { get; }
+
+        string SubscriptionId { get; }
+
+        string DeadletterTopicId { get; }
+
+        string LocalBackupFolder { get; }
     }
 }

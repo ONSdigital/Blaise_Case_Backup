@@ -19,12 +19,14 @@ namespace BlaiseCaseBackup.Tests.Services
         private readonly string _instrumentName;
         private readonly string _serverPark;
         private readonly string _bucketName;
+        private readonly string _localBackupPath;
 
         public BackupSurveysServiceTests()
         {
             _instrumentName = "Instrument1";
             _serverPark = "Park1";
             _bucketName = "OpnBucket";
+            _localBackupPath = "BackupPath";
         }
 
         private BackupSurveysService _sut;
@@ -38,11 +40,13 @@ namespace BlaiseCaseBackup.Tests.Services
             _blaiseApiMock.Setup(b => b.WithInstrument(It.IsAny<string>())).Returns(_blaiseApiMock.Object);
             _blaiseApiMock.Setup(b => b.WithServerPark(It.IsAny<string>())).Returns(_blaiseApiMock.Object);
 
-            _blaiseApiMock.Setup(b => b.Survey.ToBucket(It.IsAny<string>())).Returns(_blaiseApiMock.Object as IFluentBlaiseSurveyApi);
-            _blaiseApiMock.Setup(b => b.Survey.ToBucket(It.IsAny<string>()).Backup());
+            _blaiseApiMock.Setup(b => b.Survey.ToPath(It.IsAny<string>()).ToBucket(It.IsAny<string>(),
+                It.IsAny<string>()).Backup());
 
             _configurationProviderMock = new Mock<IConfigurationProvider>();
             _configurationProviderMock.Setup(c => c.BucketName).Returns(_bucketName);
+            _configurationProviderMock.Setup(c => c.LocalBackupFolder).Returns(_localBackupPath);
+
 
             _sut = new BackupSurveysService(
                 _loggingMock.Object,
@@ -75,6 +79,9 @@ namespace BlaiseCaseBackup.Tests.Services
 
             _blaiseApiMock.Setup(b => b.Surveys).Returns(new List<ISurvey> { surveyMock.Object });
 
+            var localFolderPath = $"{_localBackupPath}/{_serverPark}";
+            var folderPath = $"{_serverPark}";
+
             //act
             _sut.BackupSurveys();
 
@@ -82,7 +89,8 @@ namespace BlaiseCaseBackup.Tests.Services
             _blaiseApiMock.Verify(v => v.Surveys, Times.Once);
             _blaiseApiMock.Verify(v => v.WithInstrument(_instrumentName), Times.Once);
             _blaiseApiMock.Verify(v => v.WithServerPark(_serverPark), Times.Once);
-            _blaiseApiMock.Verify(v => v.Survey.ToBucket(_bucketName).Backup(), Times.Once);
+            _blaiseApiMock.Verify(v => v.Survey
+                .ToPath(localFolderPath).ToBucket(_bucketName, folderPath).Backup(), Times.Once);
         }
     }
 }

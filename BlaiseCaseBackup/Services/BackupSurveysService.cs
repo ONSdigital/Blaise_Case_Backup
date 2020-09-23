@@ -27,17 +27,21 @@ namespace BlaiseCaseBackup.Services
                     .WithConnection(_blaiseApi.DefaultConnection)
                     .Surveys)
             {
-                _logger.Info($"Processing survey '{survey.Name}' for server park '{survey.ServerPark}'");
+                _logger.Info($"Processing survey '{survey.Name}' for server park '{survey.ServerPark}' on '{_configurationProvider.VmName}'");
+
+                var localFolderPath = $"{_configurationProvider.LocalBackupFolder}/{survey.ServerPark}";
+                var folderPath = $"{survey.ServerPark}";
 
                 _blaiseApi
                     .WithConnection(_blaiseApi.DefaultConnection)
                     .WithInstrument(survey.Name)
                     .WithServerPark(survey.ServerPark)
                     .Survey
-                    .ToBucket(_configurationProvider.BucketName)
+                    .ToPath(localFolderPath)
+                    .ToBucket(_configurationProvider.BucketName, folderPath)
                     .Backup();
 
-                _logger.Info($"Backed up survey '{survey.Name}' for server park '{survey.ServerPark}' to bucket '{_configurationProvider.BucketName}'");
+                _logger.Info($"Backed up survey '{survey.Name}' for server park '{survey.ServerPark}' to bucket '{_configurationProvider.BucketName}' on '{_configurationProvider.VmName}'");
             }
         }
     }
