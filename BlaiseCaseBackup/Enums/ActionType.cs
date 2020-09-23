@@ -9,7 +9,7 @@ namespace BlaiseCaseBackup.Enums
     {
         NotSupported = 0,
 
-        [EnumMember(Value = "backup")]
-        Inspect
+        [EnumMember(Value = "start_backup")]
+        StartBackup
     }
 }

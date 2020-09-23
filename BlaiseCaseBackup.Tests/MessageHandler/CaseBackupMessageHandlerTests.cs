@@ -23,7 +23,7 @@ namespace BlaiseCaseBackup.Tests.MessageHandler
         public CaseBackupMessageHandlerTests()
         {
             _message = "Message";
-            _actionModel = new CaseBackupActionModel { Action = ActionType.Inspect};
+            _actionModel = new CaseBackupActionModel { Action = ActionType.StartBackup};
         }
 
         [SetUp]
@@ -73,7 +73,7 @@ namespace BlaiseCaseBackup.Tests.MessageHandler
         public void Given_A_Inspect_Action_Is_Set_When_I_Call_HandleMessage_Then_True_Is_Returned()
         {
             //arrange
-            _actionModel.Action = ActionType.Inspect;
+            _actionModel.Action = ActionType.StartBackup;
 
             //act
             var result = _sut.HandleMessage(_message);
@@ -87,7 +87,7 @@ namespace BlaiseCaseBackup.Tests.MessageHandler
         public void Given_A_Inspect_Action_Is_Set_When_I_Call_HandleMessage_Then_The_Correct_Services_Are_Called()
         {
             //arrange
-            _actionModel.Action = ActionType.Inspect;
+            _actionModel.Action = ActionType.StartBackup;
 
             //act
             _sut.HandleMessage(_message);
