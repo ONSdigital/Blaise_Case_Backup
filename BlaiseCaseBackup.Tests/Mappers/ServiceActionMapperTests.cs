@@ -20,7 +20,7 @@ namespace BlaiseCaseBackup.Tests.Mappers
         {
             //arrange
             const string message =
-                @"{ ""ACTION"":""backup""}";
+                @"{ ""ACTION"":""start_backup""}";
 
             //act
             var result = _sut.MapToCaseBackupActionModel(message);
@@ -28,7 +28,7 @@ namespace BlaiseCaseBackup.Tests.Mappers
             //assert`
             Assert.NotNull(result);
             Assert.IsInstanceOf<CaseBackupActionModel>(result);
-            Assert.AreEqual(ActionType.Inspect, result.Action);
+            Assert.AreEqual(ActionType.StartBackup, result.Action);
         }
 
         [Test]

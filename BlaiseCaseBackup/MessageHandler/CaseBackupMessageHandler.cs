@@ -30,7 +30,7 @@ namespace BlaiseCaseBackup.MessageHandler
 
                 var messageModel = _mapper.MapToCaseBackupActionModel(message);
 
-                if (messageModel.Action != ActionType.Inspect)
+                if (messageModel.Action != ActionType.StartBackup)
                 {
                     return true;
                 }
