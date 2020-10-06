@@ -69,6 +69,19 @@ namespace BlaiseCaseBackup.Tests.Services
         }
 
         [Test]
+        public void Given_I_Call_BackupSurveys_And_There_Are_No_Surveys_Then_I_Log_A_Warning()
+        {
+            //arrange
+            _blaiseApiMock.Setup(b => b.Surveys).Returns(new List<ISurvey>());
+
+            //act
+            _sut.BackupSurveys();
+
+            //assert
+            _loggingMock.Verify(v => v.Warn("There are no surveys available"), Times.Once);
+        }
+
+        [Test]
         public void Given_I_Call_BackupSurveys_And_There_Are_Surveys_Then_The_Surveys_Are_Backed_Up()
         {
             //arrange

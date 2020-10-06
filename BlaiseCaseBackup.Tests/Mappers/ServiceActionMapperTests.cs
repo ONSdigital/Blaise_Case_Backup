@@ -20,7 +20,7 @@ namespace BlaiseCaseBackup.Tests.Mappers
         {
             //arrange
             const string message =
-                @"{ ""ACTION"":""start_backup""}";
+                @"{ ""action"":""start_backup""}";
 
             //act
             var result = _sut.MapToCaseBackupActionModel(message);

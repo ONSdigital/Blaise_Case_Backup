@@ -1,6 +1,9 @@
-﻿using Blaise.Nuget.Api.Contracts.Interfaces;
+﻿using System.Collections.Generic;
+using System.Linq;
+using Blaise.Nuget.Api.Contracts.Interfaces;
 using BlaiseCaseBackup.Interfaces;
 using log4net;
+using StatNeth.Blaise.API.ServerManager;
 
 namespace BlaiseCaseBackup.Services
 {
@@ -22,27 +25,45 @@ namespace BlaiseCaseBackup.Services
 
         public void BackupSurveys()
         {
-            foreach (var survey in 
-                _blaiseApi
-                    .WithConnection(_blaiseApi.DefaultConnection)
-                    .Surveys)
+            var surveys = GetAvailableSurveys();
+
+            if (!surveys.Any())
+            {
+                _logger.Warn("There are no surveys available");
+
+                return;
+            }
+
+            foreach (var survey in surveys)
             {
                 _logger.Info($"Processing survey '{survey.Name}' for server park '{survey.ServerPark}' on '{_configurationProvider.VmName}'");
 
                 var localFolderPath = $"{_configurationProvider.LocalBackupFolder}/{survey.ServerPark}";
-                var folderPath = $"{survey.ServerPark}";
+                var bucketFolderPath = $"{survey.ServerPark}";
 
-                _blaiseApi
-                    .WithConnection(_blaiseApi.DefaultConnection)
-                    .WithInstrument(survey.Name)
-                    .WithServerPark(survey.ServerPark)
-                    .Survey
-                    .ToPath(localFolderPath)
-                    .ToBucket(_configurationProvider.BucketName, folderPath)
-                    .Backup();
+                BackupSurvey(survey, localFolderPath, bucketFolderPath);
 
                 _logger.Info($"Backed up survey '{survey.Name}' for server park '{survey.ServerPark}' to bucket '{_configurationProvider.BucketName}' on '{_configurationProvider.VmName}'");
             }
+        }
+
+        private List<ISurvey> GetAvailableSurveys()
+        {
+            return _blaiseApi
+                .WithConnection(_blaiseApi.DefaultConnection)
+                .Surveys.ToList();
+        }
+
+        private void BackupSurvey(ISurvey survey, string localFolderPath, string bucketFolderPath)
+        {
+            _blaiseApi
+                .WithConnection(_blaiseApi.DefaultConnection)
+                .WithInstrument(survey.Name)
+                .WithServerPark(survey.ServerPark)
+                .Survey
+                .ToPath(localFolderPath)
+                .ToBucket(_configurationProvider.BucketName, bucketFolderPath)
+                .Backup();
         }
     }
 }
