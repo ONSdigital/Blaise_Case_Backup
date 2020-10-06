@@ -70,6 +70,19 @@ namespace BlaiseCaseBackup.Tests.MessageHandler
         }
 
         [Test]
+        public void Given_Process_Action_Is_Not_Set_When_I_Call_HandleMessage_Then_We_Log_Indicating_We_Could_Not_Process()
+        {
+            //arrange
+            _actionModel.Action = ActionType.NotSupported;
+
+            //act
+            _sut.HandleMessage(_message);
+
+            //assert
+            _loggingMock.Verify(v => v.Warn("The message received could not be processed"), Times.Once);
+        }
+
+        [Test]
         public void Given_A_Inspect_Action_Is_Set_When_I_Call_HandleMessage_Then_True_Is_Returned()
         {
             //arrange

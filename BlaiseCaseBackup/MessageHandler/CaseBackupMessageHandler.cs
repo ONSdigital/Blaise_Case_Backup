@@ -32,6 +32,8 @@ namespace BlaiseCaseBackup.MessageHandler
 
                 if (messageModel.Action != ActionType.StartBackup)
                 {
+                    _logger.Warn("The message received could not be processed");
+
                     return true;
                 }
 

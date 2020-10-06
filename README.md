@@ -5,7 +5,7 @@ on all available server parks on the VM are backed up to a bucket in GCP
 
 # Example message
 ```
-{"action": "backup"}
+{"action": "start_backup"}
 ```
 
 # Setup Development Environment
