@@ -49,7 +49,7 @@ namespace BlaiseCaseBackup.Services
 
         public void BackupSettings()
         {
-            _logger.Info($"Attempting to Backing blaise settings on '{_configurationProvider.VmName}'");
+            _logger.Info($"Processing blaise setting files at '{_configurationProvider.SettingsFolder}' for '{_configurationProvider.VmName}'");
 
             var bucketPath = $"{_configurationProvider.VmName}/Settings";
 
@@ -59,7 +59,7 @@ namespace BlaiseCaseBackup.Services
                 .ToBucket(_configurationProvider.BucketName, bucketPath)
                 .Backup();
 
-            _logger.Info($"Blaise settings backup up to bucket '{_configurationProvider.BucketName}' for '{_configurationProvider.VmName}'");
+            _logger.Info($"Blaise settings files backup up to bucket '{_configurationProvider.BucketName}' for '{_configurationProvider.VmName}'");
         }
 
         private List<ISurvey> GetAvailableSurveys()
