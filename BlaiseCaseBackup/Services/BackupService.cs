@@ -39,16 +39,18 @@ namespace BlaiseCaseBackup.Services
                 _logger.Info($"Processing survey '{survey.Name}' for server park '{survey.ServerPark}' on '{_configurationProvider.VmName}'");
 
                 var localFolderPath = $"{_configurationProvider.LocalBackupFolder}/{survey.ServerPark}";
-                var bucketFolderPath = $"{survey.ServerPark}";
+                var bucketFolderPath = $"{_configurationProvider.VmName}/{survey.ServerPark}";
 
                 BackupSurvey(survey, localFolderPath, bucketFolderPath);
 
-                _logger.Info($"Backed up survey '{survey.Name}' for server park '{survey.ServerPark}' to bucket '{_configurationProvider.BucketName}' on '{_configurationProvider.VmName}'");
+                _logger.Info($"Backed up survey '{survey.Name}' for server park '{survey.ServerPark}' to bucket '{_configurationProvider.BucketName}' for '{_configurationProvider.VmName}'");
             }
         }
 
         public void BackupSettings()
         {
+            _logger.Info($"Attempting to Backing blaise settings on '{_configurationProvider.VmName}'");
+
             var bucketPath = $"{_configurationProvider.VmName}/Settings";
 
             _blaiseApi
@@ -56,6 +58,8 @@ namespace BlaiseCaseBackup.Services
                 .WithSourceFolder(_configurationProvider.SettingsFolder)
                 .ToBucket(_configurationProvider.BucketName, bucketPath)
                 .Backup();
+
+            _logger.Info($"Blaise settings backup up to bucket '{_configurationProvider.BucketName}' for '{_configurationProvider.VmName}'");
         }
 
         private List<ISurvey> GetAvailableSurveys()
