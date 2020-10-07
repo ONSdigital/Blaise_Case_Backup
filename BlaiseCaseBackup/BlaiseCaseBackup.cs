@@ -44,7 +44,7 @@ namespace BlaiseCaseBackup
             unityContainer.RegisterFactory<ILog>(f => LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType));
 
             //services
-            unityContainer.RegisterType<IBackupSurveysService, BackupSurveysService>();
+            unityContainer.RegisterType<IBackupService, BackupService>();
 
             //main service
             unityContainer.RegisterType<IInitialiseService, InitialiseService>();

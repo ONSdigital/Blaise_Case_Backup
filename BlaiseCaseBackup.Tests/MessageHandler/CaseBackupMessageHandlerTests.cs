@@ -12,7 +12,7 @@ namespace BlaiseCaseBackup.Tests.MessageHandler
     public class CaseBackupMessageHandlerTests
     {
         private Mock<ILog> _loggingMock;
-        private Mock<IBackupSurveysService> _backupSurveysServiceMock;
+        private Mock<IBackupService> _backupServiceMock;
         private Mock<IServiceActionMapper> _mapperMock;
 
         private readonly string _message;
@@ -31,7 +31,7 @@ namespace BlaiseCaseBackup.Tests.MessageHandler
         {
             _loggingMock = new Mock<ILog>();
 
-            _backupSurveysServiceMock = new Mock<IBackupSurveysService>();
+            _backupServiceMock = new Mock<IBackupService>();
 
             _mapperMock = new Mock<IServiceActionMapper>();
             _mapperMock.Setup(m => m.MapToCaseBackupActionModel(_message)).Returns(_actionModel);
@@ -39,7 +39,7 @@ namespace BlaiseCaseBackup.Tests.MessageHandler
             _sut = new CaseBackupMessageHandler(
                 _loggingMock.Object,
                 _mapperMock.Object,
-                _backupSurveysServiceMock.Object);
+                _backupServiceMock.Object);
         }
 
         [Test]
@@ -66,7 +66,7 @@ namespace BlaiseCaseBackup.Tests.MessageHandler
             _sut.HandleMessage(_message);
 
             //assert
-            _backupSurveysServiceMock.VerifyNoOtherCalls();
+            _backupServiceMock.VerifyNoOtherCalls();
         }
 
         [Test]
@@ -83,7 +83,7 @@ namespace BlaiseCaseBackup.Tests.MessageHandler
         }
 
         [Test]
-        public void Given_A_Inspect_Action_Is_Set_When_I_Call_HandleMessage_Then_True_Is_Returned()
+        public void Given_A_Backup_Action_Is_Set_When_I_Call_HandleMessage_Then_True_Is_Returned()
         {
             //arrange
             _actionModel.Action = ActionType.StartBackup;
@@ -97,7 +97,7 @@ namespace BlaiseCaseBackup.Tests.MessageHandler
         }
 
         [Test]
-        public void Given_A_Inspect_Action_Is_Set_When_I_Call_HandleMessage_Then_The_Correct_Services_Are_Called()
+        public void Given_A_Backup_Action_Is_Set_When_I_Call_HandleMessage_Then_The_Surveys_Are_Backed_Up()
         {
             //arrange
             _actionModel.Action = ActionType.StartBackup;
@@ -106,14 +106,27 @@ namespace BlaiseCaseBackup.Tests.MessageHandler
             _sut.HandleMessage(_message);
 
             //assert
-            _backupSurveysServiceMock.Verify(v => v.BackupSurveys(), Times.Once);
+            _backupServiceMock.Verify(v => v.BackupSurveys(), Times.Once);
         }
-        
+
+        [Test]
+        public void Given_A_Backup_Action_Is_Set_When_I_Call_HandleMessage_Then_The_Settings_Are_Backed_Up()
+        {
+            //arrange
+            _actionModel.Action = ActionType.StartBackup;
+
+            //act
+            _sut.HandleMessage(_message);
+
+            //assert
+            _backupServiceMock.Verify(v => v.BackupSettings(), Times.Once);
+        }
+
         [Test]
         public void Given_An_Error_Occurs_When_I_Call_HandleMessage_Then_False_Is_Returned()
         {
             //arrange
-            _backupSurveysServiceMock.Setup(c => c.BackupSurveys()).Throws(new Exception());
+            _backupServiceMock.Setup(c => c.BackupSurveys()).Throws(new Exception());
 
             //act 
             var result = _sut.HandleMessage(_message);
@@ -127,7 +140,7 @@ namespace BlaiseCaseBackup.Tests.MessageHandler
         public void Given_An_Error_Occurs_When_I_Call_HandleMessage_Then_Exception_Is_Handled_Correctly()
         {
             //arrange
-            _backupSurveysServiceMock.Setup(c => c.BackupSurveys()).Throws(new Exception());
+            _backupServiceMock.Setup(c => c.BackupSurveys()).Throws(new Exception());
 
             //act && assert
             Assert.DoesNotThrow(() => _sut.HandleMessage(_message));
@@ -137,12 +150,12 @@ namespace BlaiseCaseBackup.Tests.MessageHandler
         public void Given_An_Error_Occurs_When_I_Call_HandleMessage_Then_Nothing_Is_Processed()
         {
             //arrange
-            _backupSurveysServiceMock.Setup(c => c.BackupSurveys()).Throws(new Exception());
+            _backupServiceMock.Setup(c => c.BackupSurveys()).Throws(new Exception());
 
             //act && assert
             _sut.HandleMessage(_message);
-            _backupSurveysServiceMock.Verify(v =>v.BackupSurveys(), Times.Once);
-            _backupSurveysServiceMock.VerifyNoOtherCalls();
+            _backupServiceMock.Verify(v =>v.BackupSurveys(), Times.Once);
+            _backupServiceMock.VerifyNoOtherCalls();
         }
     }
 }

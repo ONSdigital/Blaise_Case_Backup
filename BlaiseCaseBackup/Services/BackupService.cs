@@ -7,13 +7,13 @@ using StatNeth.Blaise.API.ServerManager;
 
 namespace BlaiseCaseBackup.Services
 {
-    public class BackupSurveysService : IBackupSurveysService
+    public class BackupService : IBackupService
     {
         private readonly ILog _logger;
         private readonly IFluentBlaiseApi _blaiseApi;
         private readonly IConfigurationProvider _configurationProvider;
 
-        public BackupSurveysService(
+        public BackupService(
             ILog logger, 
             IFluentBlaiseApi blaiseApi, 
             IConfigurationProvider configurationProvider)
@@ -45,6 +45,17 @@ namespace BlaiseCaseBackup.Services
 
                 _logger.Info($"Backed up survey '{survey.Name}' for server park '{survey.ServerPark}' to bucket '{_configurationProvider.BucketName}' on '{_configurationProvider.VmName}'");
             }
+        }
+
+        public void BackupSettings()
+        {
+            var bucketPath = $"{_configurationProvider.VmName}/Settings";
+
+            _blaiseApi
+                .Settings
+                .WithSourceFolder(_configurationProvider.SettingsFolder)
+                .ToBucket(_configurationProvider.BucketName, bucketPath)
+                .Backup();
         }
 
         private List<ISurvey> GetAvailableSurveys()
