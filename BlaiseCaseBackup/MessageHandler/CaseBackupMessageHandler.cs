@@ -10,16 +10,16 @@ namespace BlaiseCaseBackup.MessageHandler
     {
         private readonly ILog _logger;
         private readonly IServiceActionMapper _mapper;
-        private readonly IBackupSurveysService _backupSurveysService;
+        private readonly IBackupService _backupService;
 
         public CaseBackupMessageHandler(
             ILog logger, 
             IServiceActionMapper mapper, 
-            IBackupSurveysService backupSurveysService)
+            IBackupService backupService)
         {
             _logger = logger;
             _mapper = mapper;
-            _backupSurveysService = backupSurveysService;
+            _backupService = backupService;
         }
 
         public bool HandleMessage(string message)
@@ -37,7 +37,8 @@ namespace BlaiseCaseBackup.MessageHandler
                     return true;
                 }
 
-                _backupSurveysService.BackupSurveys();
+                _backupService.BackupSurveys();
+                _backupService.BackupSettings();
 
                 return true;
             }

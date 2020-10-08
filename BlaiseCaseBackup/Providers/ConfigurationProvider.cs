@@ -20,5 +20,7 @@ namespace BlaiseCaseBackup.Providers
         public string DeadletterTopicId => ConfigurationManager.AppSettings["DeadletterTopicId"];
 
         public string LocalBackupFolder => ConfigurationManager.AppSettings["LocalBackupFolder"];
+        public string SettingsFolder => Environment.GetEnvironmentVariable("ENV_SETTINGS_DIRECTORY", EnvironmentVariableTarget.Machine)
+                                        ?? ConfigurationManager.AppSettings["SettingsFolder"];
     }
 }

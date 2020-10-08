@@ -20,6 +20,7 @@ namespace BlaiseCaseBackup.Tests.Services
         private readonly string _serverPark;
         private readonly string _bucketName;
         private readonly string _localBackupPath;
+        private readonly string _vmName;
 
         public BackupSurveysServiceTests()
         {
@@ -27,9 +28,10 @@ namespace BlaiseCaseBackup.Tests.Services
             _serverPark = "Park1";
             _bucketName = "OpnBucket";
             _localBackupPath = "BackupPath";
+            _vmName = "Tel";
         }
 
-        private BackupSurveysService _sut;
+        private BackupService _sut;
 
         [SetUp]
         public void SetUpTests()
@@ -46,9 +48,9 @@ namespace BlaiseCaseBackup.Tests.Services
             _configurationProviderMock = new Mock<IConfigurationProvider>();
             _configurationProviderMock.Setup(c => c.BucketName).Returns(_bucketName);
             _configurationProviderMock.Setup(c => c.LocalBackupFolder).Returns(_localBackupPath);
-
-
-            _sut = new BackupSurveysService(
+            _configurationProviderMock.Setup(c => c.VmName).Returns(_vmName);
+            
+            _sut = new BackupService(
                 _loggingMock.Object,
                 _blaiseApiMock.Object,
                 _configurationProviderMock.Object);
@@ -65,7 +67,7 @@ namespace BlaiseCaseBackup.Tests.Services
 
             //assert
             _blaiseApiMock.Verify(v => v.Surveys, Times.Once);
-            _blaiseApiMock.Verify(v => v.Survey.Backup(), Times.Never);
+            _blaiseApiMock.Verify(v => v.Backup(), Times.Never);
         }
 
         [Test]
@@ -93,7 +95,7 @@ namespace BlaiseCaseBackup.Tests.Services
             _blaiseApiMock.Setup(b => b.Surveys).Returns(new List<ISurvey> { surveyMock.Object });
 
             var localFolderPath = $"{_localBackupPath}/{_serverPark}";
-            var folderPath = $"{_serverPark}";
+            var folderPath = $"{_vmName}/{_serverPark}";
 
             //act
             _sut.BackupSurveys();
@@ -104,6 +106,35 @@ namespace BlaiseCaseBackup.Tests.Services
             _blaiseApiMock.Verify(v => v.WithServerPark(_serverPark), Times.Once);
             _blaiseApiMock.Verify(v => v.Survey
                 .ToPath(localFolderPath).ToBucket(_bucketName, folderPath).Backup(), Times.Once);
+        }
+
+        [Test]
+        public void Given_I_Call_BackupSettings_And_There_Are_Settings_Files_Then_The_Files_Are_Backed_Up()
+        {
+            //arrange
+            var settingsFolder = "SettingsFolder";
+            var folderPath = $"{_vmName}/Settings";
+
+            _configurationProviderMock.Setup(c => c.SettingsFolder).Returns(settingsFolder);
+
+            _blaiseApiMock.Setup(b => b
+                .Settings
+                .WithSourceFolder(It.IsAny<string>())
+                .ToBucket(It.IsAny<string>(), It.IsAny<string>())
+                .Backup());
+
+
+            //act
+            _sut.BackupSettings();
+
+            //assert
+            _blaiseApiMock.Verify(
+                v => v
+                    .Settings
+                    .WithSourceFolder(settingsFolder)
+                    .ToBucket(_bucketName, folderPath)
+                    .Backup(), Times.Once);
+
         }
     }
 }

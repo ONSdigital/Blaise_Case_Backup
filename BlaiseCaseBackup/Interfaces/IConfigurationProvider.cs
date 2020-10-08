@@ -15,5 +15,7 @@
         string DeadletterTopicId { get; }
 
         string LocalBackupFolder { get; }
+
+        string SettingsFolder { get; }
     }
 }
