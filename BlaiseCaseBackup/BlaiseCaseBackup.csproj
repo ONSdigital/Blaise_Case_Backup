@@ -226,6 +226,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Enums\ActionType.cs" />
+    <Compile Include="Extensions\ConfigurationExtensionMethods.cs" />
     <Compile Include="Interfaces\IInitialiseService.cs" />
     <Compile Include="Interfaces\IQueueService.cs" />
     <Compile Include="Interfaces\IServiceActionMapper.cs" />
@@ -248,6 +249,7 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Providers\ConfigurationProvider.cs" />
     <Compile Include="Interfaces\IConfigurationProvider.cs" />
+    <Compile Include="Providers\LocalConfigurationProvider.cs" />
     <Compile Include="Services\BackupService.cs" />
     <Compile Include="Interfaces\IBackupService.cs" />
     <Compile Include="Services\InitialiseService.cs" />
