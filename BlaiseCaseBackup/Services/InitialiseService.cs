@@ -35,6 +35,7 @@ namespace BlaiseCaseBackup.Services
             catch (Exception ex)
             {
                 _logger.Error(ex);
+                throw;
             }
 
             _logger.Info($"Starting case backup service started on '{_configurationProvider.VmName}'");
