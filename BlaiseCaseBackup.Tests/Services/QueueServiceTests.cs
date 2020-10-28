@@ -58,8 +58,7 @@ namespace BlaiseCaseBackup.Tests.Services
         {
             //arrange
             _queueProviderMock.Setup(q => q.WithProject(It.IsAny<string>())).Returns(_queueProviderMock.Object);
-            _queueProviderMock.Setup(q => q.WithTopic(It.IsAny<string>())).Returns(_queueProviderMock.Object);
-            _queueProviderMock.Setup(q => q.CreateSubscription(It.IsAny<string>(), It.IsAny<int>())).Returns(_queueProviderMock.Object);
+            _queueProviderMock.Setup(q => q.WithSubscription(It.IsAny<string>())).Returns(_queueProviderMock.Object);
             _queueProviderMock.Setup(q => q.WithExponentialBackOff(It.IsAny<int>(), It.IsAny<int>())).Returns(_queueProviderMock.Object);
             _queueProviderMock.Setup(q => q.WithDeadLetter(It.IsAny<string>(),
                 It.IsAny<int>())).Returns(_queueProviderMock.Object);
@@ -70,8 +69,7 @@ namespace BlaiseCaseBackup.Tests.Services
 
             //assert
             _queueProviderMock.Verify(v => v.WithProject(_projectId), Times.Once);
-            _queueProviderMock.Verify(v => v.WithTopic(_subscriptionTopicId), Times.Once);
-            _queueProviderMock.Verify(v => v.CreateSubscription($"{_subscriptionId}-{_vmName}", It.IsAny<int>()), Times.Once);
+            _queueProviderMock.Verify(v => v.WithSubscription(_subscriptionId), Times.Once);
             _queueProviderMock.Verify(v => v.WithExponentialBackOff(60, 600), Times.Once);
             _queueProviderMock.Verify(v => v.WithDeadLetter(_deadLetterTopicId, 5), Times.Once);
             _queueProviderMock.Verify(v => v.StartConsuming(_messageHandlerMock.Object, It.IsAny<bool>()), Times.Once);
