@@ -9,9 +9,12 @@ namespace BlaiseCaseBackup.Extensions
 {
     public static class ConfigurationExtensionMethods
     {
-        public static string ThrowExceptionIfNotNull(this string enviromentVariable)
+        public static void ThrowExceptionIfNull(this string environmentVariable, string variableName)
         {
-            throw new ConfigurationErrorsException($"No value found for enviroment variable '{enviromentVariable}'");
+            if (string.IsNullOrWhiteSpace(environmentVariable))
+            {
+                throw new ConfigurationErrorsException($"No value found for environment variable '{variableName}'");
+            }
         }
     }
 }
