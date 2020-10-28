@@ -37,19 +37,6 @@ namespace BlaiseCaseBackup.Tests.Providers
         }
 
         [Test]
-        public void Given_I_Call_SubscriptionTopicId_I_Get_The_Correct_Value_Back()
-        {
-            //arrange
-            var configurationProvider = new LocalConfigurationProvider();
-
-            //act
-            var result = configurationProvider.SubscriptionTopicId;
-
-            //assert
-            Assert.AreEqual("SubscriptionTopicIdTest", result);
-        }
-
-        [Test]
         public void Given_I_Call_SubscriptionId_I_Get_The_Correct_Value_Back()
         {
             //arrange
