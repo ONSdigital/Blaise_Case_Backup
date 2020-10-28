@@ -39,7 +39,6 @@ namespace Blaise.Case.Backup.Tests.Unit.Services
             _configurationProviderMock = new Mock<IConfigurationProvider>();
             _configurationProviderMock.Setup(c => c.ProjectId).Returns(_projectId);
             _configurationProviderMock.Setup(c => c.SubscriptionId).Returns(_subscriptionId);
-            _configurationProviderMock.Setup(c => c.SubscriptionTopicId).Returns(_subscriptionTopicId);
             _configurationProviderMock.Setup(c => c.VmName).Returns(_vmName);
             _configurationProviderMock.Setup(c => c.DeadletterTopicId).Returns(_deadLetterTopicId);
 
@@ -58,8 +57,7 @@ namespace Blaise.Case.Backup.Tests.Unit.Services
         {
             //arrange
             _queueProviderMock.Setup(q => q.WithProject(It.IsAny<string>())).Returns(_queueProviderMock.Object);
-            _queueProviderMock.Setup(q => q.WithTopic(It.IsAny<string>())).Returns(_queueProviderMock.Object);
-            _queueProviderMock.Setup(q => q.CreateSubscription(It.IsAny<string>(), It.IsAny<int>())).Returns(_queueProviderMock.Object);
+            _queueProviderMock.Setup(q => q.WithSubscription(It.IsAny<string>())).Returns(_queueProviderMock.Object);
             _queueProviderMock.Setup(q => q.WithExponentialBackOff(It.IsAny<int>(), It.IsAny<int>())).Returns(_queueProviderMock.Object);
             _queueProviderMock.Setup(q => q.WithDeadLetter(It.IsAny<string>(),
                 It.IsAny<int>())).Returns(_queueProviderMock.Object);
@@ -70,8 +68,7 @@ namespace Blaise.Case.Backup.Tests.Unit.Services
 
             //assert
             _queueProviderMock.Verify(v => v.WithProject(_projectId), Times.Once);
-            _queueProviderMock.Verify(v => v.WithTopic(_subscriptionTopicId), Times.Once);
-            _queueProviderMock.Verify(v => v.CreateSubscription($"{_subscriptionId}-{_vmName}", It.IsAny<int>()), Times.Once);
+            _queueProviderMock.Verify(v => v.WithSubscription(_subscriptionId), Times.Once);
             _queueProviderMock.Verify(v => v.WithExponentialBackOff(60, 600), Times.Once);
             _queueProviderMock.Verify(v => v.WithDeadLetter(_deadLetterTopicId, 5), Times.Once);
             _queueProviderMock.Verify(v => v.StartConsuming(_messageHandlerMock.Object, It.IsAny<bool>()), Times.Once);

@@ -11,8 +11,6 @@ namespace Blaise.Case.Backup.Providers
 
         public string ProjectId => ConfigurationManager.AppSettings["ProjectId"];
 
-        public string SubscriptionTopicId => ConfigurationManager.AppSettings["SubscriptionTopicId"];
-
         public string SubscriptionId => ConfigurationManager.AppSettings["SubscriptionId"];
 
         public string DeadletterTopicId => ConfigurationManager.AppSettings["DeadletterTopicId"];
