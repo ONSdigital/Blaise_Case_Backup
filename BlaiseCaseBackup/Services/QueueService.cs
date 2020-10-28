@@ -28,8 +28,7 @@ namespace BlaiseCaseBackup.Services
         {
             _queueApi
                 .WithProject(_configurationProvider.ProjectId)
-                .WithTopic(_configurationProvider.SubscriptionTopicId)
-                .CreateSubscription(_subscriptionId)
+                .WithSubscription(_subscriptionId)
                 .WithExponentialBackOff(60)
                 .WithDeadLetter(_configurationProvider.DeadletterTopicId)
                 .StartConsuming(messageHandler, true);
