@@ -69,7 +69,7 @@ namespace BlaiseCaseBackup.Tests.Providers
             });
 
             //assert
-            Assert.AreEqual("No value found for environment variable 'ENV_BCB_SUB_SUBS'", exception.Message);
+            Assert.AreEqual("No value found for environment variable 'ENV_BCB_SUB_TOPIC'", exception.Message);
         }
 
         [Test]
