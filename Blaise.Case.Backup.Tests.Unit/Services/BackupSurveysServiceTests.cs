@@ -13,19 +13,23 @@ namespace Blaise.Case.Backup.Tests.Unit.Services
     public class BackupSurveysServiceTests
     {
         private Mock<ILog> _loggingMock;
-        private Mock<IFluentBlaiseApi> _blaiseApiMock;
+        private Mock<IBlaiseApi> _blaiseApiMock;
         private Mock<IConfigurationProvider> _configurationProviderMock;
 
+        private readonly ConnectionModel _connectionModel;
+
         private readonly string _instrumentName;
-        private readonly string _serverPark;
+        private readonly string _serverParkName;
         private readonly string _bucketName;
         private readonly string _localBackupPath;
         private readonly string _vmName;
 
         public BackupSurveysServiceTests()
         {
+            _connectionModel = new ConnectionModel();
+
             _instrumentName = "Instrument1";
-            _serverPark = "Park1";
+            _serverParkName = "Park1";
             _bucketName = "OpnBucket";
             _localBackupPath = "BackupPath";
             _vmName = "Tel";
@@ -37,13 +41,8 @@ namespace Blaise.Case.Backup.Tests.Unit.Services
         public void SetUpTests()
         {
             _loggingMock = new Mock<ILog>();
-            _blaiseApiMock = new Mock<IFluentBlaiseApi>();
-            _blaiseApiMock.Setup(b => b.WithConnection(It.IsAny<ConnectionModel>())).Returns(_blaiseApiMock.Object);
-            _blaiseApiMock.Setup(b => b.WithInstrument(It.IsAny<string>())).Returns(_blaiseApiMock.Object);
-            _blaiseApiMock.Setup(b => b.WithServerPark(It.IsAny<string>())).Returns(_blaiseApiMock.Object);
-
-            _blaiseApiMock.Setup(b => b.Survey.ToPath(It.IsAny<string>()).ToBucket(It.IsAny<string>(),
-                It.IsAny<string>()).Backup());
+            _blaiseApiMock = new Mock<IBlaiseApi>();
+            _blaiseApiMock.Setup(b => b.GetDefaultConnectionModel()).Returns(_connectionModel);
 
             _configurationProviderMock = new Mock<IConfigurationProvider>();
             _configurationProviderMock.Setup(c => c.BucketName).Returns(_bucketName);
@@ -60,21 +59,26 @@ namespace Blaise.Case.Backup.Tests.Unit.Services
         public void Given_I_Call_BackupSurveys_And_There_Are_No_Surveys_Then_No_Records_Are_Processed()
         {
             //arrange
-            _blaiseApiMock.Setup(b => b.Surveys).Returns(new List<ISurvey>());
+            _blaiseApiMock.Setup(b => b.GetAllSurveys(It.IsAny<ConnectionModel>())).Returns(new List<ISurvey>());
 
             //act
             _sut.BackupSurveys();
 
             //assert
-            _blaiseApiMock.Verify(v => v.Surveys, Times.Once);
-            _blaiseApiMock.Verify(v => v.Backup(), Times.Never);
+            _blaiseApiMock.Verify(v => v.GetAllSurveys(_connectionModel), Times.Once);
+
+            _blaiseApiMock.Verify(v => v.BackupSurveyToFile(It.IsAny<ConnectionModel>(), It.IsAny<string>(),
+                It.IsAny<string>(), It.IsAny<string>()), Times.Never);
+
+            _blaiseApiMock.Verify(v => v.BackupFilesToBucket(It.IsAny<string>(),
+                It.IsAny<string>(), It.IsAny<string>()), Times.Never);
         }
 
         [Test]
         public void Given_I_Call_BackupSurveys_And_There_Are_No_Surveys_Then_I_Log_A_Warning()
         {
             //arrange
-            _blaiseApiMock.Setup(b => b.Surveys).Returns(new List<ISurvey>());
+            _blaiseApiMock.Setup(b => b.GetAllSurveys(It.IsAny<ConnectionModel>())).Returns(new List<ISurvey>());
 
             //act
             _sut.BackupSurveys();
@@ -90,22 +94,24 @@ namespace Blaise.Case.Backup.Tests.Unit.Services
 
             var surveyMock = new Mock<ISurvey>();
             surveyMock.Setup(s => s.Name).Returns(_instrumentName);
-            surveyMock.Setup(s => s.ServerPark).Returns(_serverPark);
+            surveyMock.Setup(s => s.ServerPark).Returns(_serverParkName);
 
-            _blaiseApiMock.Setup(b => b.Surveys).Returns(new List<ISurvey> { surveyMock.Object });
+            _blaiseApiMock.Setup(b => b.GetAllSurveys(It.IsAny<ConnectionModel>())).Returns(new List<ISurvey> { surveyMock.Object });
 
-            var localFolderPath = $"{_localBackupPath}/{_serverPark}";
-            var folderPath = $"{_vmName}/{_serverPark}";
+            var localFolderPath = $"{_localBackupPath}/{_serverParkName}";
+            var folderPath = $"{_vmName}/{_serverParkName}";
 
             //act
             _sut.BackupSurveys();
 
             //assert
-            _blaiseApiMock.Verify(v => v.Surveys, Times.Once);
-            _blaiseApiMock.Verify(v => v.WithInstrument(_instrumentName), Times.Once);
-            _blaiseApiMock.Verify(v => v.WithServerPark(_serverPark), Times.Once);
-            _blaiseApiMock.Verify(v => v.Survey
-                .ToPath(localFolderPath).ToBucket(_bucketName, folderPath).Backup(), Times.Once);
+            _blaiseApiMock.Verify(v => v.GetAllSurveys(_connectionModel), Times.Once);
+
+            _blaiseApiMock.Verify(v => v.BackupSurveyToFile(_connectionModel, _serverParkName,
+                _instrumentName, localFolderPath), Times.Once);
+
+            _blaiseApiMock.Verify(v => v.BackupFilesToBucket(localFolderPath,
+                _bucketName,  folderPath), Times.Once);
         }
 
         [Test]
@@ -117,23 +123,14 @@ namespace Blaise.Case.Backup.Tests.Unit.Services
 
             _configurationProviderMock.Setup(c => c.SettingsFolder).Returns(settingsFolder);
 
-            _blaiseApiMock.Setup(b => b
-                .Settings
-                .WithSourceFolder(It.IsAny<string>())
-                .ToBucket(It.IsAny<string>(), It.IsAny<string>())
-                .Backup());
-
+            _blaiseApiMock.Setup(b => b.BackupFilesToBucket(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>()));
 
             //act
             _sut.BackupSettings();
 
             //assert
             _blaiseApiMock.Verify(
-                v => v
-                    .Settings
-                    .WithSourceFolder(settingsFolder)
-                    .ToBucket(_bucketName, folderPath)
-                    .Backup(), Times.Once);
+                v => v.BackupFilesToBucket(settingsFolder, _bucketName, folderPath), Times.Once);
 
         }
     }

@@ -244,6 +244,7 @@
     <Compile Include="Providers\ConfigurationProvider.cs" />
     <Compile Include="Interfaces\IConfigurationProvider.cs" />
     <Compile Include="Providers\LocalConfigurationProvider.cs" />
+    <Compile Include="Providers\UnityProvider.cs" />
     <Compile Include="Services\BackupService.cs" />
     <Compile Include="Interfaces\IBackupService.cs" />
     <Compile Include="Services\InitialiseService.cs" />

@@ -10,12 +10,12 @@ namespace Blaise.Case.Backup.Services
     public class BackupService : IBackupService
     {
         private readonly ILog _logger;
-        private readonly IFluentBlaiseApi _blaiseApi;
+        private readonly IBlaiseApi _blaiseApi;
         private readonly IConfigurationProvider _configurationProvider;
 
         public BackupService(
-            ILog logger, 
-            IFluentBlaiseApi blaiseApi, 
+            ILog logger,
+            IBlaiseApi blaiseApi, 
             IConfigurationProvider configurationProvider)
         {
             _logger = logger;
@@ -53,32 +53,20 @@ namespace Blaise.Case.Backup.Services
 
             var bucketPath = $"{_configurationProvider.VmName}/Settings";
 
-            _blaiseApi
-                .Settings
-                .WithSourceFolder(_configurationProvider.SettingsFolder)
-                .ToBucket(_configurationProvider.BucketName, bucketPath)
-                .Backup();
+            _blaiseApi.BackupFilesToBucket(_configurationProvider.SettingsFolder, _configurationProvider.BucketName, bucketPath);
 
             _logger.Info($"Blaise settings files backup up to bucket '{_configurationProvider.BucketName}' for '{_configurationProvider.VmName}'");
         }
 
         private List<ISurvey> GetAvailableSurveys()
         {
-            return _blaiseApi
-                .WithConnection(_blaiseApi.DefaultConnection)
-                .Surveys.ToList();
+            return _blaiseApi.GetAllSurveys(_blaiseApi.GetDefaultConnectionModel()).ToList();
         }
 
         private void BackupSurvey(ISurvey survey, string localFolderPath, string bucketFolderPath)
         {
-            _blaiseApi
-                .WithConnection(_blaiseApi.DefaultConnection)
-                .WithInstrument(survey.Name)
-                .WithServerPark(survey.ServerPark)
-                .Survey
-                .ToPath(localFolderPath)
-                .ToBucket(_configurationProvider.BucketName, bucketFolderPath)
-                .Backup();
+            _blaiseApi.BackupSurveyToFile(_blaiseApi.GetDefaultConnectionModel(), survey.ServerPark, survey.Name, localFolderPath);
+            _blaiseApi.BackupFilesToBucket(localFolderPath, _configurationProvider.BucketName, bucketFolderPath);
         }
     }
 }

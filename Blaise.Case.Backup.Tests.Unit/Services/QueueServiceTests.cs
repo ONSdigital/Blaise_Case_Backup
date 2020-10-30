@@ -15,7 +15,6 @@ namespace Blaise.Case.Backup.Tests.Unit.Services
         private Mock<IFluentQueueApi> _queueProviderMock;
 
         private readonly string _projectId;
-        private readonly string _subscriptionTopicId;
         private readonly string _subscriptionId;
         private readonly string _vmName;
         private readonly string _deadLetterTopicId;
@@ -25,7 +24,6 @@ namespace Blaise.Case.Backup.Tests.Unit.Services
         public QueueServiceTests()
         {
             _projectId = "ProjectId";
-            _subscriptionTopicId = "subscriptionTopicId";
             _subscriptionId = "SubscriptionId";
             _vmName = "VmName";
             _deadLetterTopicId = "deadLetterTopicId";
