@@ -12,12 +12,11 @@ namespace BlaiseCaseBackup.Tests.Providers
         {
             //arrange
             var configurationProvider = new ConfigurationProvider();
-
+            
             //act
             var exception = Assert.Throws<ConfigurationErrorsException>(() =>
             { 
             var result = configurationProvider.BucketName;
-
             });
 
             //assert
@@ -65,7 +64,7 @@ namespace BlaiseCaseBackup.Tests.Providers
             //act
             var exception = Assert.Throws<ConfigurationErrorsException>(() =>
             {
-                var result = configurationProvider.SubscriptionTopicId;
+                var result = configurationProvider.SubscriptionId;
             });
 
             //assert

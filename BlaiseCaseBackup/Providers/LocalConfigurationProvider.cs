@@ -1,13 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using BlaiseCaseBackup.Interfaces;
 using System.Configuration;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+
 
 namespace BlaiseCaseBackup.Providers
 {
-    public class LocalConfigurationProvider
+    public class LocalConfigurationProvider : IConfigurationProvider
     {
         public string BucketName => ConfigurationManager.AppSettings["BucketName"];
 
