@@ -1,26 +1,32 @@
 ﻿using System;
 using System.Configuration;
+using BlaiseCaseBackup.Extensions;
 using BlaiseCaseBackup.Interfaces;
+using StatNeth.Blaise.Runtime.DataContract.Rules.Interfaces;
 
 namespace BlaiseCaseBackup.Providers
 {
     public class ConfigurationProvider : IConfigurationProvider
     {
-        public string BucketName => ConfigurationManager.AppSettings["BucketName"];
+     
+        public string BucketName => GetVariable("ENV_BCB_BUCKET_NAME");
 
         public string VmName => Environment.MachineName;
 
-        public string ProjectId => Environment.GetEnvironmentVariable("ENV_PROJECT_ID", EnvironmentVariableTarget.Machine)
-                                   ?? ConfigurationManager.AppSettings["ProjectId"];
+        public string ProjectId => GetVariable("ENV_PROJECT_ID");
+        public string SubscriptionTopicId => GetVariable("ENV_BCB_SUB_TOPIC");
+        public string SubscriptionId => GetVariable("ENV_BCB_SUB_SUBS");
+        public string DeadletterTopicId => GetVariable("ENV_DEADLETTER_TOPIC");
+        public string LocalBackupFolder => GetVariable("ENV_BCB_LOCAL_BACKUP_DIR");
+        public string SettingsFolder => GetVariable("ENV_SETTINGS_DIRECTORY");
 
-        public string SubscriptionTopicId => ConfigurationManager.AppSettings["SubscriptionTopicId"];
+        private static string GetVariable(string variableName)
+        {
+            var value = Environment.GetEnvironmentVariable(variableName, EnvironmentVariableTarget.Machine);
 
-        public string SubscriptionId => ConfigurationManager.AppSettings["SubscriptionId"];
+            value.ThrowExceptionIfNull(variableName);
 
-        public string DeadletterTopicId => ConfigurationManager.AppSettings["DeadletterTopicId"];
-
-        public string LocalBackupFolder => ConfigurationManager.AppSettings["LocalBackupFolder"];
-        public string SettingsFolder => Environment.GetEnvironmentVariable("ENV_SETTINGS_DIRECTORY", EnvironmentVariableTarget.Machine)
-                                        ?? ConfigurationManager.AppSettings["SettingsFolder"];
+            return value;
+        }
     }
 }
