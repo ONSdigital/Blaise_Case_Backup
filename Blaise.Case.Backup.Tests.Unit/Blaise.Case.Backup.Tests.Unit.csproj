@@ -79,7 +79,7 @@
     <Compile Include="Providers\ConfigurationProviderTests.cs" />
     <Compile Include="Providers\LocalConfigurationProviderTests.cs" />
     <Compile Include="Providers\UnityProviderTests.cs" />
-    <Compile Include="Services\BackupSurveysServiceTests.cs" />
+    <Compile Include="Services\BackupServiceTests.cs" />
     <Compile Include="Services\InitialiseServiceTests.cs" />
     <Compile Include="Services\QueueServiceTests.cs" />
   </ItemGroup>

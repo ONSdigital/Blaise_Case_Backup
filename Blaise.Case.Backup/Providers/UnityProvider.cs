@@ -39,12 +39,15 @@ namespace Blaise.Case.Backup.Providers
             //logging
             _unityContainer.RegisterFactory<ILog>(f => LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType));
 
+            //storage provider
+            _unityContainer.RegisterType<IStorageClientProvider, StorageClientProvider>();
+
             //services
             _unityContainer.RegisterType<IBackupService, BackupService>();
+            _unityContainer.RegisterType<IBucketService, BucketService>();
 
             //main service
             _unityContainer.RegisterType<IInitialiseService, InitialiseService>();
-
 
 #if (DEBUG)
             var credentialKey = ConfigurationManager.AppSettings["GOOGLE_APPLICATION_CREDENTIALS"];
@@ -52,7 +55,6 @@ namespace Blaise.Case.Backup.Providers
             Environment.SetEnvironmentVariable("GOOGLE_APPLICATION_CREDENTIALS", credentialKey);
             _unityContainer.RegisterType<IConfigurationProvider, LocalConfigurationProvider>();
 #else
-            _unityContainer.RegisterType<IConfigurationProvider, ConfigurationProvider>();
             _unityContainer.RegisterType<IConfigurationProvider, ConfigurationProvider>();
 #endif
 

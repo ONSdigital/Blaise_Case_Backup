@@ -10,17 +10,20 @@ namespace Blaise.Case.Backup.Services
     public class BackupService : IBackupService
     {
         private readonly ILog _logger;
-        private readonly IBlaiseApi _blaiseApi;
         private readonly IConfigurationProvider _configurationProvider;
+        private readonly IBlaiseApi _blaiseApi;
+        private readonly IBucketService _bucketService;
 
         public BackupService(
             ILog logger,
-            IBlaiseApi blaiseApi, 
-            IConfigurationProvider configurationProvider)
+            IConfigurationProvider configurationProvider,
+            IBlaiseApi blaiseApi,
+            IBucketService bucketService)
         {
             _logger = logger;
             _blaiseApi = blaiseApi;
             _configurationProvider = configurationProvider;
+            _bucketService = bucketService;
         }
 
         public void BackupSurveys()
@@ -51,9 +54,9 @@ namespace Blaise.Case.Backup.Services
         {
             _logger.Info($"Processing blaise setting files at '{_configurationProvider.SettingsFolder}' for '{_configurationProvider.VmName}'");
 
-            var bucketPath = $"{_configurationProvider.VmName}/Settings";
+            var bucketFolderPath = $"{_configurationProvider.VmName}/Settings";
 
-            _blaiseApi.BackupFilesToBucket(_configurationProvider.SettingsFolder, _configurationProvider.BucketName, bucketPath);
+            _bucketService.BackupFilesToBucket(_configurationProvider.SettingsFolder, _configurationProvider.BucketName, bucketFolderPath);
 
             _logger.Info($"Blaise settings files backup up to bucket '{_configurationProvider.BucketName}' for '{_configurationProvider.VmName}'");
         }
@@ -66,7 +69,7 @@ namespace Blaise.Case.Backup.Services
         private void BackupSurvey(ISurvey survey, string localFolderPath, string bucketFolderPath)
         {
             _blaiseApi.BackupSurveyToFile(_blaiseApi.GetDefaultConnectionModel(), survey.ServerPark, survey.Name, localFolderPath);
-            _blaiseApi.BackupFilesToBucket(localFolderPath, _configurationProvider.BucketName, bucketFolderPath);
+            _bucketService.BackupFilesToBucket(localFolderPath, _configurationProvider.BucketName, bucketFolderPath);
         }
     }
 }

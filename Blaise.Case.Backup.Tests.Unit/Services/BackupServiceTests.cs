@@ -10,11 +10,12 @@ using StatNeth.Blaise.API.ServerManager;
 
 namespace Blaise.Case.Backup.Tests.Unit.Services
 {
-    public class BackupSurveysServiceTests
+    public class BackupServiceTests
     {
         private Mock<ILog> _loggingMock;
-        private Mock<IBlaiseApi> _blaiseApiMock;
         private Mock<IConfigurationProvider> _configurationProviderMock;
+        private Mock<IBlaiseApi> _blaiseApiMock;
+        private Mock<IBucketService> _bucketServiceMock;
 
         private readonly ConnectionModel _connectionModel;
 
@@ -24,7 +25,7 @@ namespace Blaise.Case.Backup.Tests.Unit.Services
         private readonly string _localBackupPath;
         private readonly string _vmName;
 
-        public BackupSurveysServiceTests()
+        public BackupServiceTests()
         {
             _connectionModel = new ConnectionModel();
 
@@ -41,18 +42,22 @@ namespace Blaise.Case.Backup.Tests.Unit.Services
         public void SetUpTests()
         {
             _loggingMock = new Mock<ILog>();
-            _blaiseApiMock = new Mock<IBlaiseApi>();
-            _blaiseApiMock.Setup(b => b.GetDefaultConnectionModel()).Returns(_connectionModel);
 
             _configurationProviderMock = new Mock<IConfigurationProvider>();
             _configurationProviderMock.Setup(c => c.BucketName).Returns(_bucketName);
             _configurationProviderMock.Setup(c => c.LocalBackupFolder).Returns(_localBackupPath);
             _configurationProviderMock.Setup(c => c.VmName).Returns(_vmName);
-            
+
+            _blaiseApiMock = new Mock<IBlaiseApi>();
+            _blaiseApiMock.Setup(b => b.GetDefaultConnectionModel()).Returns(_connectionModel);
+
+            _bucketServiceMock = new Mock<IBucketService>();
+
             _sut = new BackupService(
                 _loggingMock.Object,
+                _configurationProviderMock.Object,
                 _blaiseApiMock.Object,
-                _configurationProviderMock.Object);
+                _bucketServiceMock.Object);              
         }
 
         [Test]
@@ -70,7 +75,7 @@ namespace Blaise.Case.Backup.Tests.Unit.Services
             _blaiseApiMock.Verify(v => v.BackupSurveyToFile(It.IsAny<ConnectionModel>(), It.IsAny<string>(),
                 It.IsAny<string>(), It.IsAny<string>()), Times.Never);
 
-            _blaiseApiMock.Verify(v => v.BackupFilesToBucket(It.IsAny<string>(),
+            _bucketServiceMock.Verify(v => v.BackupFilesToBucket(It.IsAny<string>(),
                 It.IsAny<string>(), It.IsAny<string>()), Times.Never);
         }
 
@@ -110,7 +115,7 @@ namespace Blaise.Case.Backup.Tests.Unit.Services
             _blaiseApiMock.Verify(v => v.BackupSurveyToFile(_connectionModel, _serverParkName,
                 _instrumentName, localFolderPath), Times.Once);
 
-            _blaiseApiMock.Verify(v => v.BackupFilesToBucket(localFolderPath,
+            _bucketServiceMock.Verify(v => v.BackupFilesToBucket(localFolderPath,
                 _bucketName,  folderPath), Times.Once);
         }
 
@@ -129,7 +134,7 @@ namespace Blaise.Case.Backup.Tests.Unit.Services
             _sut.BackupSettings();
 
             //assert
-            _blaiseApiMock.Verify(
+            _bucketServiceMock.Verify(
                 v => v.BackupFilesToBucket(settingsFolder, _bucketName, folderPath), Times.Once);
 
         }

@@ -227,9 +227,11 @@
   <ItemGroup>
     <Compile Include="Enums\ActionType.cs" />
     <Compile Include="Extensions\ConfigurationExtensionMethods.cs" />
+    <Compile Include="Interfaces\IBucketService.cs" />
     <Compile Include="Interfaces\IInitialiseService.cs" />
     <Compile Include="Interfaces\IQueueService.cs" />
     <Compile Include="Interfaces\IServiceActionMapper.cs" />
+    <Compile Include="Interfaces\IStorageClientProvider.cs" />
     <Compile Include="Mappers\ServiceActionMapper.cs" />
     <Compile Include="MessageHandler\CaseBackupMessageHandler.cs" />
     <Compile Include="Models\CaseBackupActionModel.cs" />
@@ -244,9 +246,11 @@
     <Compile Include="Providers\ConfigurationProvider.cs" />
     <Compile Include="Interfaces\IConfigurationProvider.cs" />
     <Compile Include="Providers\LocalConfigurationProvider.cs" />
+    <Compile Include="Providers\StorageClientProvider.cs" />
     <Compile Include="Providers\UnityProvider.cs" />
     <Compile Include="Services\BackupService.cs" />
     <Compile Include="Interfaces\IBackupService.cs" />
+    <Compile Include="Services\BucketService.cs" />
     <Compile Include="Services\InitialiseService.cs" />
     <Compile Include="Services\QueueService.cs" />
   </ItemGroup>
