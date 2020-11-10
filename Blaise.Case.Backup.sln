@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 16
 VisualStudioVersion = 16.0.30011.22
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Blaise.Case.Backup.WindowsService", "Blaise.Case.Backup\Blaise.Case.Backup.WindowsService.csproj", "{73BDED70-C27B-49C1-ABA7-A2E01B7ED675}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Blaise.Case.Backup.WindowsService", "Blaise.Case.Backup.WindowsService\Blaise.Case.Backup.WindowsService.csproj", "{73BDED70-C27B-49C1-ABA7-A2E01B7ED675}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Blaise.Case.Backup.Tests.Unit", "Blaise.Case.Backup.Tests.Unit\Blaise.Case.Backup.Tests.Unit.csproj", "{80A12F89-01A2-47B4-8143-475DFCBE987E}"
 EndProject

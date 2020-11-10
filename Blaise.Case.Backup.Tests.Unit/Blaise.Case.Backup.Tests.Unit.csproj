@@ -105,7 +105,7 @@
       <Project>{a2dd5cb1-1b48-4445-b529-69914db78f73}</Project>
       <Name>Blaise.Case.Backup.MessageBroker</Name>
     </ProjectReference>
-    <ProjectReference Include="..\Blaise.Case.Backup\Blaise.Case.Backup.WindowsService.csproj">
+    <ProjectReference Include="..\Blaise.Case.Backup.WindowsService\Blaise.Case.Backup.WindowsService.csproj">
       <Project>{73bded70-c27b-49c1-aba7-a2e01b7ed675}</Project>
       <Name>Blaise.Case.Backup.WindowsService</Name>
     </ProjectReference>
