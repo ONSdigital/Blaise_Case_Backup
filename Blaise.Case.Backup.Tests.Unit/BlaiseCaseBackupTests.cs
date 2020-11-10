@@ -1,4 +1,5 @@
-﻿using Blaise.Case.Backup.Interfaces;
+﻿using Blaise.Case.Backup.WindowsService;
+using Blaise.Case.Backup.WindowsService.Interfaces;
 using NUnit.Framework;
 
 namespace Blaise.Case.Backup.Tests.Unit
@@ -24,7 +25,7 @@ namespace Blaise.Case.Backup.Tests.Unit
 
             //assert
             Assert.NotNull(result.InitialiseService);
-            Assert.IsInstanceOf<IInitialiseService>(result.InitialiseService);
+            Assert.IsInstanceOf<IInitialiseWindowsService>(result.InitialiseService);
         }
     }
 }

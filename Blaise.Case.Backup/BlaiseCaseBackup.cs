@@ -1,19 +1,19 @@
 ﻿using System.ServiceProcess;
-using Blaise.Case.Backup.Interfaces;
-using Blaise.Case.Backup.Providers;
+using Blaise.Case.Backup.WindowsService.Interfaces;
+using Blaise.Case.Backup.WindowsService.Ioc;
 
-namespace Blaise.Case.Backup
+namespace Blaise.Case.Backup.WindowsService
 {
     public partial class BlaiseCaseBackup : ServiceBase
     {
-        public IInitialiseService InitialiseService;
+        public IInitialiseWindowsService InitialiseService;
 
         public BlaiseCaseBackup()
         {
             InitializeComponent();
             var unityProvider = new UnityProvider();
 
-            InitialiseService = unityProvider.Resolve<IInitialiseService>();
+            InitialiseService = unityProvider.Resolve<IInitialiseWindowsService>();
         }
 
         public void OnDebug()

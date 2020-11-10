@@ -1,4 +1,4 @@
-﻿namespace Blaise.Case.Backup
+﻿namespace Blaise.Case.Backup.WindowsService
 {
     partial class BlaiseCaseBackup
     {

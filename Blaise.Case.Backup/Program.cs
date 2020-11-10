@@ -1,6 +1,6 @@
 ﻿using System.ServiceProcess;
 
-namespace Blaise.Case.Backup
+namespace Blaise.Case.Backup.WindowsService
 {
     static class Program
     {
